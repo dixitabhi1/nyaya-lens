@@ -47,7 +47,28 @@ export default function FIRResult({ data }: { data: any }) {
       )}
 
       {data.legal_reasoning && <ResultCard title="Legal Reasoning"><p className="text-sm whitespace-pre-wrap text-muted-foreground">{data.legal_reasoning}</p></ResultCard>}
-      {data.jurisdiction && <ResultCard title="Jurisdiction"><p className="text-sm">{typeof data.jurisdiction === "string" ? data.jurisdiction : JSON.stringify(data.jurisdiction)}</p></ResultCard>}
+      {data.jurisdiction && (
+        <ResultCard title="Jurisdiction">
+          {typeof data.jurisdiction === "string" ? (
+            <p className="text-sm">{data.jurisdiction}</p>
+          ) : (
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              {data.jurisdiction.suggested_police_station && (
+                <div><span className="text-muted-foreground">Police Station:</span> <span>{data.jurisdiction.suggested_police_station}</span></div>
+              )}
+              {data.jurisdiction.district && (
+                <div><span className="text-muted-foreground">District:</span> <span>{data.jurisdiction.district}</span></div>
+              )}
+              {data.jurisdiction.state && (
+                <div><span className="text-muted-foreground">State:</span> <span>{data.jurisdiction.state}</span></div>
+              )}
+              {data.jurisdiction.confidence !== undefined && (
+                <div><span className="text-muted-foreground">Confidence:</span> <span>{Math.round(data.jurisdiction.confidence * 100)}%</span></div>
+              )}
+            </div>
+          )}
+        </ResultCard>
+      )}
 
       {(data.completeness_score !== undefined || data.case_strength_score !== undefined) && (
         <div className="grid grid-cols-2 gap-4">
