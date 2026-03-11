@@ -91,12 +91,16 @@ function ManualTab() {
 
   const handlePreview = async () => {
     setLoading(true); setError("");
-    try { setPreview(await firManualPreview(buildPayload())); } catch (e: any) { setError(e.message); } finally { setLoading(false); }
+    try {
+      setSubmitted(null);
+      setPreview(await firManualPreview(buildPayload()));
+    } catch (e: any) { setError(e.message); } finally { setLoading(false); }
   };
 
   const handleSubmit = async () => {
     setLoading(true); setError("");
     try {
+      setPreview(null);
       const result = await firManualSubmit(buildPayload());
       setSubmitted(result);
       // Clear saved form on successful submit
@@ -142,7 +146,7 @@ function ManualTab() {
       </div>
       {loading && <LoadingState />}
       {error && <NoticeBanner variant="error">{error}</NoticeBanner>}
-      {(preview || submitted) && <FIRResult data={submitted || preview} />}
+      {(preview || submitted) && <FIRResult data={preview || submitted} />}
     </div>
   );
 }
@@ -165,13 +169,19 @@ function UploadTab() {
   const handlePreview = async () => {
     if (!file) return;
     setLoading(true); setError("");
-    try { setPreview(await firUploadPreview(makeForm())); } catch (e: any) { setError(e.message); } finally { setLoading(false); }
+    try {
+      setSubmitted(null);
+      setPreview(await firUploadPreview(makeForm()));
+    } catch (e: any) { setError(e.message); } finally { setLoading(false); }
   };
 
   const handleSubmit = async () => {
     if (!file) return;
     setLoading(true); setError("");
-    try { setSubmitted(await firUploadSubmit(makeForm())); } catch (e: any) { setError(e.message); } finally { setLoading(false); }
+    try {
+      setPreview(null);
+      setSubmitted(await firUploadSubmit(makeForm()));
+    } catch (e: any) { setError(e.message); } finally { setLoading(false); }
   };
 
   return (
@@ -184,7 +194,7 @@ function UploadTab() {
       </div>
       {loading && <LoadingState />}
       {error && <NoticeBanner variant="error">{error}</NoticeBanner>}
-      {(preview || submitted) && <FIRResult data={submitted || preview} />}
+      {(preview || submitted) && <FIRResult data={preview || submitted} />}
     </div>
   );
 }
@@ -211,13 +221,19 @@ function VoiceTab() {
   const handlePreview = async () => {
     if (!file && !transcriptText.trim()) return;
     setLoading(true); setError("");
-    try { setPreview(await firVoicePreview(makeForm())); } catch (e: any) { setError(e.message); } finally { setLoading(false); }
+    try {
+      setSubmitted(null);
+      setPreview(await firVoicePreview(makeForm()));
+    } catch (e: any) { setError(e.message); } finally { setLoading(false); }
   };
 
   const handleSubmit = async () => {
     if (!file && !transcriptText.trim()) return;
     setLoading(true); setError("");
-    try { setSubmitted(await firVoiceSubmit(makeForm())); } catch (e: any) { setError(e.message); } finally { setLoading(false); }
+    try {
+      setPreview(null);
+      setSubmitted(await firVoiceSubmit(makeForm()));
+    } catch (e: any) { setError(e.message); } finally { setLoading(false); }
   };
 
   return (
@@ -234,7 +250,7 @@ function VoiceTab() {
       </div>
       {loading && <LoadingState />}
       {error && <NoticeBanner variant="error">{error}</NoticeBanner>}
-      {(preview || submitted) && <FIRResult data={submitted || preview} />}
+      {(preview || submitted) && <FIRResult data={preview || submitted} />}
     </div>
   );
 }
