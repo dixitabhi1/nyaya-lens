@@ -10,6 +10,24 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
     },
   });
   if (!res.ok) {
+    if (res.status === 422) {
+      try {
+        const json = await res.json();
+        if (json?.detail && Array.isArray(json.detail)) {
+          const messages = json.detail.map((d: any) => {
+            const field = d.loc?.slice(1).join(".") || "unknown field";
+            const label = field.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase());
+            if (d.type === "missing" || d.type === "value_error.missing") return `${label} is required`;
+            return d.msg ? `${label}: ${d.msg}` : `${label} is invalid`;
+          });
+          throw new Error(messages.join("\n"));
+        }
+        throw new Error(json?.detail || "Validation error: please check your inputs.");
+      } catch (e: any) {
+        if (e instanceof Error && !e.message.startsWith("API Error")) throw e;
+        throw new Error("Validation error: please check your inputs.");
+      }
+    }
     const text = await res.text();
     throw new Error(`API Error ${res.status}: ${text}`);
   }

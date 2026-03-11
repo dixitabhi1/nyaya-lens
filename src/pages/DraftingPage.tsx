@@ -11,18 +11,27 @@ import { NoticeBanner } from "@/components/shared/NoticeBanner";
 import { PenTool, Download } from "lucide-react";
 
 export default function DraftingPage() {
-  const [docType, setDocType] = useState("");
-  const [details, setDetails] = useState("");
+  const [draftType, setDraftType] = useState("");
+  const [facts, setFacts] = useState("");
+  const [parties, setParties] = useState("");
+  const [reliefSought, setReliefSought] = useState("");
+  const [jurisdiction, setJurisdiction] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState("");
 
   const handleSubmit = async () => {
-    if (!details.trim() || loading) return;
+    if (!facts.trim() || !draftType.trim() || loading) return;
     setLoading(true);
     setError("");
     try {
-      const res = await draftDocument({ document_type: docType, details });
+      const res = await draftDocument({
+        draft_type: draftType,
+        facts,
+        parties: parties.split(",").map((p) => p.trim()).filter(Boolean),
+        relief_sought: reliefSought,
+        jurisdiction,
+      });
       setResult(res);
     } catch (e: any) {
       setError(e.message);
@@ -37,7 +46,7 @@ export default function DraftingPage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${docType || "legal-draft"}.txt`;
+    a.download = `${draftType || "legal-draft"}.txt`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -47,9 +56,12 @@ export default function DraftingPage() {
       <PageHeader title="Legal Document Drafting" description="Generate professional legal documents using AI." />
 
       <div className="space-y-4 mb-6">
-        <Input value={docType} onChange={(e) => setDocType(e.target.value)} placeholder="Document type (e.g., Rental Agreement, Legal Notice)" />
-        <Textarea value={details} onChange={(e) => setDetails(e.target.value)} placeholder="Provide details for the document..." rows={5} />
-        <Button onClick={handleSubmit} disabled={loading || !details.trim()}>
+        <Input value={draftType} onChange={(e) => setDraftType(e.target.value)} placeholder="Draft type (e.g., Legal Notice, Rental Agreement)" />
+        <Textarea value={facts} onChange={(e) => setFacts(e.target.value)} placeholder="Describe the facts of the case..." rows={4} />
+        <Input value={parties} onChange={(e) => setParties(e.target.value)} placeholder="Parties (comma-separated, e.g., Author, Unauthorized user)" />
+        <Input value={reliefSought} onChange={(e) => setReliefSought(e.target.value)} placeholder="Relief sought (e.g., Cease use and remove copied material)" />
+        <Input value={jurisdiction} onChange={(e) => setJurisdiction(e.target.value)} placeholder="Jurisdiction (e.g., Lucknow)" />
+        <Button onClick={handleSubmit} disabled={loading || !facts.trim() || !draftType.trim()}>
           <PenTool className="h-4 w-4 mr-2" /> Generate Draft
         </Button>
       </div>
