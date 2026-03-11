@@ -24,6 +24,24 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
     );
   }
   if (!res.ok) {
+    if (res.status === 401) {
+      try {
+        const json = await res.json();
+        const detail = json?.detail || "";
+        if (path === "/auth/login") {
+          throw new Error(
+            "Invalid email or password. If you created your account before the latest backend redeploy, register again.",
+          );
+        }
+        if (path === "/auth/me" || path === "/auth/logout") {
+          throw new Error("Your session has expired. Please sign in again.");
+        }
+        throw new Error(detail || "Authentication failed. Please sign in again.");
+      } catch (e: any) {
+        if (e instanceof Error) throw e;
+        throw new Error("Authentication failed. Please sign in again.");
+      }
+    }
     if (res.status === 422) {
       try {
         const json = await res.json();
