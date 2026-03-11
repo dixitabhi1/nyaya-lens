@@ -8,6 +8,7 @@ import { ResultCard } from "@/components/shared/ResultCard";
 import { LoadingState } from "@/components/shared/LoadingState";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { NoticeBanner } from "@/components/shared/NoticeBanner";
+import { UserHistoryPanel } from "@/components/shared/UserHistoryPanel";
 import { PenTool, Download } from "lucide-react";
 
 export default function DraftingPage() {
@@ -41,8 +42,8 @@ export default function DraftingPage() {
   };
 
   const handleDownload = () => {
-    if (!result?.draft) return;
-    const blob = new Blob([result.draft], { type: "text/plain" });
+    if (!result?.content) return;
+    const blob = new Blob([result.content], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -52,9 +53,10 @@ export default function DraftingPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="max-w-6xl mx-auto p-6">
       <PageHeader title="Legal Document Drafting" description="Generate professional legal documents using AI." />
-
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <div>
       <div className="space-y-4 mb-6">
         <Input value={draftType} onChange={(e) => setDraftType(e.target.value)} placeholder="Draft type (e.g., Legal Notice, Rental Agreement)" />
         <Textarea value={facts} onChange={(e) => setFacts(e.target.value)} placeholder="Describe the facts of the case..." rows={4} />
@@ -73,22 +75,31 @@ export default function DraftingPage() {
       {result && (
         <div className="space-y-4 animate-fade-in">
           <ResultCard title="Draft Preview">
-            <pre className="text-sm whitespace-pre-wrap font-body leading-relaxed">{result.draft}</pre>
+            <pre className="text-sm whitespace-pre-wrap font-body leading-relaxed">{result.content}</pre>
             <div className="mt-4 pt-4 border-t">
               <Button variant="outline" size="sm" onClick={handleDownload}>
                 <Download className="h-4 w-4 mr-2" /> Download Draft
               </Button>
             </div>
           </ResultCard>
-          {result.review_notes && (
+          {result.notes && (
             <ResultCard title="Review Notes">
-              {Array.isArray(result.review_notes) ? (
-                <ul className="list-disc list-inside text-sm space-y-1">{result.review_notes.map((n: string, i: number) => <li key={i}>{n}</li>)}</ul>
-              ) : <p className="text-sm">{result.review_notes}</p>}
+              {Array.isArray(result.notes) ? (
+                <ul className="list-disc list-inside text-sm space-y-1">{result.notes.map((n: string, i: number) => <li key={i}>{n}</li>)}</ul>
+              ) : <p className="text-sm">{result.notes}</p>}
             </ResultCard>
           )}
         </div>
       )}
+      </div>
+      <div className="space-y-4">
+        <UserHistoryPanel
+          category="drafting"
+          title="Previous Drafts"
+          onSelect={(item) => setFacts(item.prompt_excerpt || "")}
+        />
+      </div>
+      </div>
     </div>
   );
 }

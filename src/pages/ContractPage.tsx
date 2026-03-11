@@ -9,6 +9,7 @@ import { LoadingState } from "@/components/shared/LoadingState";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { NoticeBanner } from "@/components/shared/NoticeBanner";
 import { StatusPill } from "@/components/shared/StatusPill";
+import { UserHistoryPanel } from "@/components/shared/UserHistoryPanel";
 import { ShieldCheck } from "lucide-react";
 
 export default function ContractPage() {
@@ -36,9 +37,10 @@ export default function ContractPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="max-w-6xl mx-auto p-6">
       <PageHeader title="Contract Analysis" description="Upload or paste a contract for AI-powered clause extraction and risk analysis." />
-
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <div>
       <div className="space-y-4 mb-6">
         <FileUpload onFile={setFile} accept=".pdf,.doc,.docx,.txt" label="Upload contract document" />
         <Textarea value={text} onChange={(e) => setText(e.target.value)} placeholder="Or paste contract text here..." rows={4} />
@@ -72,7 +74,7 @@ export default function ContractPage() {
                 {result.risks.map((r: any, i: number) => (
                   <div key={i} className="flex items-start gap-2">
                     <StatusPill label={r.severity || "Risk"} variant={r.severity === "high" ? "error" : "warning"} />
-                    <p className="text-sm">{typeof r === "string" ? r : r.description || r.text}</p>
+                    <p className="text-sm">{typeof r === "string" ? r : r.issue || r.description || r.text}</p>
                   </div>
                 ))}
               </div>
@@ -85,6 +87,11 @@ export default function ContractPage() {
           )}
         </div>
       )}
+      </div>
+      <div className="space-y-4">
+        <UserHistoryPanel category="documents" title="Document History" />
+      </div>
+      </div>
     </div>
   );
 }

@@ -8,6 +8,7 @@ import { LoadingState } from "@/components/shared/LoadingState";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { NoticeBanner } from "@/components/shared/NoticeBanner";
 import { StatusPill } from "@/components/shared/StatusPill";
+import { UserHistoryPanel } from "@/components/shared/UserHistoryPanel";
 import { TrendingUp } from "lucide-react";
 
 export default function StrengthPage() {
@@ -21,7 +22,16 @@ export default function StrengthPage() {
     setLoading(true);
     setError("");
     try {
-      const res = await predictStrength({ case_description: input });
+      const evidenceItems = /\b(screenshot|invoice|recording|photo|video|cctv|document|statement)\b/i.test(input) ? 2 : 0;
+      const witnessCount = /\bwitness|saw|seen by\b/i.test(input) ? 1 : 0;
+      const res = await predictStrength({
+        evidence_items: evidenceItems,
+        witness_count: witnessCount,
+        documentary_support: /\b(document|invoice|statement|receipt)\b/i.test(input),
+        police_complaint_filed: /\bfir|complaint filed|police complaint\b/i.test(input),
+        incident_recency_days: /\byesterday|today|last night\b/i.test(input) ? 1 : 30,
+        jurisdiction_match: true,
+      });
       setResult(res);
     } catch (e: any) {
       setError(e.message);
@@ -37,9 +47,10 @@ export default function StrengthPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="max-w-6xl mx-auto p-6">
       <PageHeader title="Case Strength Prediction" description="Assess the strength of a legal case using AI analysis." />
-
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <div>
       <div className="space-y-4 mb-6">
         <Textarea value={input} onChange={(e) => setInput(e.target.value)} placeholder="Describe the case for strength prediction..." rows={5} />
         <Button onClick={handleSubmit} disabled={loading || !input.trim()}>
@@ -73,9 +84,26 @@ export default function StrengthPage() {
             </div>
           </ResultCard>
           {result.verdict && <ResultCard title="Verdict"><p className="text-sm font-medium">{result.verdict}</p></ResultCard>}
-          {result.rationale && <ResultCard title="Rationale"><p className="text-sm whitespace-pre-wrap text-muted-foreground">{result.rationale}</p></ResultCard>}
+          {result.rationale && (
+            <ResultCard title="Rationale">
+              {Array.isArray(result.rationale) ? (
+                <ul className="list-disc list-inside text-sm space-y-1 text-muted-foreground">
+                  {result.rationale.map((line: string, index: number) => <li key={index}>{line}</li>)}
+                </ul>
+              ) : <p className="text-sm whitespace-pre-wrap text-muted-foreground">{result.rationale}</p>}
+            </ResultCard>
+          )}
         </div>
       )}
+      </div>
+      <div className="space-y-4">
+        <UserHistoryPanel
+          category="analysis"
+          title="Strength History"
+          onSelect={(item) => setInput(item.prompt_excerpt || item.title)}
+        />
+      </div>
+      </div>
     </div>
   );
 }

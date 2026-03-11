@@ -78,6 +78,8 @@ export const authLogin = (data: { email: string; password: string }) =>
 export const authMe = () => get<any>("/auth/me");
 
 export const authLogout = () => post<any>("/auth/logout", {});
+export const getHistory = (category?: string, limit = 20) =>
+  get<any>(`/history?limit=${limit}${category ? `&category=${encodeURIComponent(category)}` : ""}`);
 
 // Chat
 export const chatQuery = (question: string, language = "en") =>

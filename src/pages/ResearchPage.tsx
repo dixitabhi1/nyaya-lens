@@ -8,6 +8,7 @@ import { CitationCard } from "@/components/shared/CitationCard";
 import { LoadingState } from "@/components/shared/LoadingState";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { NoticeBanner } from "@/components/shared/NoticeBanner";
+import { UserHistoryPanel } from "@/components/shared/UserHistoryPanel";
 import { BookOpen } from "lucide-react";
 
 export default function ResearchPage() {
@@ -31,9 +32,10 @@ export default function ResearchPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="max-w-6xl mx-auto p-6">
       <PageHeader title="Legal Research Engine" description="Search statutes, judgments, and legal precedents using semantic search." />
-
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <div>
       <div className="space-y-4 mb-6">
         <Textarea value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search for legal topics, statutes, or case law..." rows={3} />
         <Button onClick={handleSubmit} disabled={loading || !query.trim()}>
@@ -48,20 +50,23 @@ export default function ResearchPage() {
       {result && (
         <div className="space-y-4 animate-fade-in">
           {result.summary && <ResultCard title="Research Summary"><p className="text-sm whitespace-pre-wrap">{result.summary}</p></ResultCard>}
-          {result.results && result.results.length > 0 && (
-            <div>
-              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Retrieved Documents</h4>
-              <div className="grid gap-3">{result.results.map((s: any, i: number) => <CitationCard key={i} source={s} />)}</div>
-            </div>
-          )}
-          {result.sources && result.sources.length > 0 && (
+          {result.hits && result.hits.length > 0 && (
             <div>
               <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Sources</h4>
-              <div className="grid gap-2 sm:grid-cols-2">{result.sources.map((s: any, i: number) => <CitationCard key={i} source={s} />)}</div>
+              <div className="grid gap-2 sm:grid-cols-2">{result.hits.map((s: any, i: number) => <CitationCard key={i} source={s} />)}</div>
             </div>
           )}
         </div>
       )}
+      </div>
+      <div className="space-y-4">
+        <UserHistoryPanel
+          category="research"
+          title="Previous Research"
+          onSelect={(item) => setQuery(item.prompt_excerpt || item.title)}
+        />
+      </div>
+      </div>
     </div>
   );
 }

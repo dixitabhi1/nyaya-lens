@@ -8,6 +8,7 @@ import { CitationCard } from "@/components/shared/CitationCard";
 import { LoadingState } from "@/components/shared/LoadingState";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { NoticeBanner } from "@/components/shared/NoticeBanner";
+import { UserHistoryPanel } from "@/components/shared/UserHistoryPanel";
 import { Search } from "lucide-react";
 
 export default function CaseAnalysisPage() {
@@ -21,7 +22,14 @@ export default function CaseAnalysisPage() {
     setLoading(true);
     setError("");
     try {
-      const res = await analyzeCase({ case_description: input });
+      const res = await analyzeCase({
+        incident_description: input,
+        location: "",
+        incident_date: "",
+        people_involved: [],
+        evidence: [],
+        language: "en",
+      });
       setResult(res);
     } catch (e: any) {
       setError(e.message);
@@ -31,9 +39,10 @@ export default function CaseAnalysisPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="max-w-6xl mx-auto p-6">
       <PageHeader title="Case Analysis Engine" description="Describe a case to get a comprehensive legal analysis." />
-
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <div>
       <div className="space-y-4 mb-6">
         <Textarea value={input} onChange={(e) => setInput(e.target.value)} placeholder="Describe the case facts in detail..." rows={5} />
         <Button onClick={handleSubmit} disabled={loading || !input.trim()}>
@@ -64,11 +73,11 @@ export default function CaseAnalysisPage() {
               ) : <p className="text-sm">{result.evidence_required}</p>}
             </ResultCard>
           )}
-          {result.next_steps && (
+          {result.recommended_next_steps && (
             <ResultCard title="Next Steps">
-              {Array.isArray(result.next_steps) ? (
-                <ol className="list-decimal list-inside text-sm space-y-1">{result.next_steps.map((s: string, i: number) => <li key={i}>{s}</li>)}</ol>
-              ) : <p className="text-sm">{result.next_steps}</p>}
+              {Array.isArray(result.recommended_next_steps) ? (
+                <ol className="list-decimal list-inside text-sm space-y-1">{result.recommended_next_steps.map((s: string, i: number) => <li key={i}>{s}</li>)}</ol>
+              ) : <p className="text-sm">{result.recommended_next_steps}</p>}
             </ResultCard>
           )}
           {result.sources && result.sources.length > 0 && (
@@ -79,6 +88,15 @@ export default function CaseAnalysisPage() {
           )}
         </div>
       )}
+      </div>
+      <div className="space-y-4">
+        <UserHistoryPanel
+          category="analysis"
+          title="Previous Analyses"
+          onSelect={(item) => setInput(item.prompt_excerpt || item.title)}
+        />
+      </div>
+      </div>
     </div>
   );
 }

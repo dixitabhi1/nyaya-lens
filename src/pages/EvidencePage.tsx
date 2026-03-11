@@ -8,6 +8,7 @@ import { FileUpload } from "@/components/shared/FileUpload";
 import { LoadingState } from "@/components/shared/LoadingState";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { NoticeBanner } from "@/components/shared/NoticeBanner";
+import { UserHistoryPanel } from "@/components/shared/UserHistoryPanel";
 import { Microscope } from "lucide-react";
 
 export default function EvidencePage() {
@@ -35,9 +36,10 @@ export default function EvidencePage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="max-w-6xl mx-auto p-6">
       <PageHeader title="Evidence Analyzer" description="Upload or paste evidence for entity extraction, timeline, and investigation insights." />
-
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <div>
       <div className="space-y-4 mb-6">
         <FileUpload onFile={setFile} label="Upload evidence file" />
         <Textarea value={text} onChange={(e) => setText(e.target.value)} placeholder="Or paste evidence text here..." rows={4} />
@@ -58,7 +60,7 @@ export default function EvidencePage() {
               <div className="flex flex-wrap gap-2">
                 {result.entities.map((e: any, i: number) => (
                   <span key={i} className="inline-flex items-center px-3 py-1 rounded-md bg-secondary text-secondary-foreground text-xs font-medium">
-                    {typeof e === "string" ? e : `${e.type}: ${e.value || e.name}`}
+                    {typeof e === "string" ? e : `${e.label || e.type}: ${e.value || e.name}`}
                   </span>
                 ))}
               </div>
@@ -69,8 +71,8 @@ export default function EvidencePage() {
               <div className="space-y-3 border-l-2 border-accent/30 pl-4">
                 {result.timeline.map((t: any, i: number) => (
                   <div key={i}>
-                    <p className="text-xs font-semibold text-accent">{t.date || t.time || `Event ${i + 1}`}</p>
-                    <p className="text-sm text-muted-foreground">{t.description || t.event || (typeof t === "string" ? t : "")}</p>
+                    <p className="text-xs font-semibold text-accent">{typeof t === "string" ? `Event ${i + 1}` : t.date || t.time || `Event ${i + 1}`}</p>
+                    <p className="text-sm text-muted-foreground">{typeof t === "string" ? t : t.description || t.event || ""}</p>
                   </div>
                 ))}
               </div>
@@ -85,6 +87,11 @@ export default function EvidencePage() {
           )}
         </div>
       )}
+      </div>
+      <div className="space-y-4">
+        <UserHistoryPanel category="documents" title="Evidence History" />
+      </div>
+      </div>
     </div>
   );
 }
