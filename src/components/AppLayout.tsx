@@ -3,8 +3,12 @@ import { AppSidebar } from "./AppSidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { ExternalLink, Scale } from "lucide-react";
 import { SWAGGER_URL } from "@/services/api";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/lib/auth-context";
 
 export function AppLayout({ children }: { children: ReactNode }) {
+  const { user, logout } = useAuth();
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
@@ -18,14 +22,25 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 <span className="font-display text-lg font-bold text-foreground tracking-tight">NyayaSetu</span>
               </div>
             </div>
-            <a
-              href={SWAGGER_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-            >
-              API Docs <ExternalLink className="h-3 w-3" />
-            </a>
+            <div className="flex items-center gap-3">
+              {user ? (
+                <div className="hidden md:block text-right">
+                  <p className="text-sm font-medium text-foreground">{user.full_name}</p>
+                  <p className="text-xs text-muted-foreground">{user.role}</p>
+                </div>
+              ) : null}
+              <a
+                href={SWAGGER_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                API Docs <ExternalLink className="h-3 w-3" />
+              </a>
+              <Button variant="outline" size="sm" onClick={() => void logout()}>
+                Logout
+              </Button>
+            </div>
           </header>
           <main className="flex-1 overflow-auto">{children}</main>
         </div>

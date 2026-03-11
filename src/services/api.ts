@@ -1,3 +1,5 @@
+import { getAuthToken } from "@/lib/auth-storage";
+
 const DEFAULT_API_BASE_URL = "https://abhishek785-nyaya-setu.hf.space/api/v1";
 const RAW_BASE_URL = import.meta.env.VITE_API_BASE_URL || DEFAULT_API_BASE_URL;
 const BASE_URL = RAW_BASE_URL.replace(/\/+$/, "");
@@ -5,11 +7,13 @@ export const SWAGGER_URL =
   import.meta.env.VITE_SWAGGER_URL || BASE_URL.replace(/\/api\/v1$/i, "/docs");
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
+  const token = getAuthToken();
   let res: Response;
   try {
     res = await fetch(`${BASE_URL}${path}`, {
       ...options,
       headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...(options?.body instanceof FormData ? {} : { "Content-Type": "application/json" }),
         ...options?.headers,
       },
@@ -59,6 +63,21 @@ function get<T>(path: string): Promise<T> {
 function put<T>(path: string, body: unknown): Promise<T> {
   return request<T>(path, { method: "PUT", body: JSON.stringify(body) });
 }
+
+// Auth
+export const authRegister = (data: {
+  email: string;
+  full_name: string;
+  password: string;
+  role?: string;
+}) => post<any>("/auth/register", data);
+
+export const authLogin = (data: { email: string; password: string }) =>
+  post<any>("/auth/login", data);
+
+export const authMe = () => get<any>("/auth/me");
+
+export const authLogout = () => post<any>("/auth/logout", {});
 
 // Chat
 export const chatQuery = (question: string, language = "en") =>
