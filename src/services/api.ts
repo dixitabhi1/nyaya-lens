@@ -86,6 +86,7 @@ export const firGet = (firId: string) => get<any>(`/fir/${firId}`);
 export const firVersions = (firId: string) => get<any>(`/fir/${firId}/versions`);
 export const firIntelligence = (firId: string) => get<any>(`/fir/${firId}/intelligence`);
 export const firAnalyticsPatterns = (days = 7) => get<any>(`/fir/analytics/patterns?window_days=${days}`);
+export const firList = (limit = 25) => get<any>(`/fir?limit=${limit}`);
 
 // Case Strength
 export const predictStrength = (data: any) => post<any>("/analysis/strength", data);
