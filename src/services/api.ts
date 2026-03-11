@@ -1,14 +1,24 @@
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://abhishek785-nyaya-setu.hf.space/api/v1";
-export const SWAGGER_URL = import.meta.env.VITE_SWAGGER_URL || "https://abhishek785-nyaya-setu.hf.space/docs";
+const DEFAULT_API_BASE_URL = "https://abhishek785-nyaya-setu.hf.space/api/v1";
+const RAW_BASE_URL = import.meta.env.VITE_API_BASE_URL || DEFAULT_API_BASE_URL;
+const BASE_URL = RAW_BASE_URL.replace(/\/+$/, "");
+export const SWAGGER_URL =
+  import.meta.env.VITE_SWAGGER_URL || BASE_URL.replace(/\/api\/v1$/i, "/docs");
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(`${BASE_URL}${path}`, {
-    ...options,
-    headers: {
-      ...(options?.body instanceof FormData ? {} : { "Content-Type": "application/json" }),
-      ...options?.headers,
-    },
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${BASE_URL}${path}`, {
+      ...options,
+      headers: {
+        ...(options?.body instanceof FormData ? {} : { "Content-Type": "application/json" }),
+        ...options?.headers,
+      },
+    });
+  } catch {
+    throw new Error(
+      "Unable to connect to the NyayaSetu API. Check the backend URL or try again shortly.",
+    );
+  }
   if (!res.ok) {
     if (res.status === 422) {
       try {

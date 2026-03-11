@@ -1,73 +1,56 @@
-# Welcome to your Lovable project
+# NyayaSetu Frontend
 
-## Project info
+This repository contains the NyayaSetu frontend intended for smooth production hosting on Vercel, with the backend served separately from Hugging Face Spaces.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+Recommended deployment split:
 
-## How can I edit this code?
+- Frontend: Vercel
+- Backend API: Hugging Face Space
+- Frontend custom domain: `www.yourdomain.com`
+- Backend API URL: `https://abhishek785-nyaya-setu.hf.space/api/v1`
 
-There are several ways of editing your application.
+## Environment variables
 
-**Use Lovable**
+Create a local `.env` file or add these in Vercel:
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+```bash
+VITE_API_BASE_URL=https://abhishek785-nyaya-setu.hf.space/api/v1
+VITE_SWAGGER_URL=https://abhishek785-nyaya-setu.hf.space/docs
+```
 
-Changes made via Lovable will be committed automatically to this repo.
+If you later move the backend to a branded API subdomain, update the same variables.
 
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+## Local development
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
 npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## Production deployment on Vercel
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+1. Import this repository into Vercel.
+2. Framework preset: `Vite`.
+3. Build command: `npm run build`.
+4. Output directory: `dist`.
+5. Add the environment variables from `.env.example`.
+6. Add your custom domain in Vercel after the first deploy.
 
-**Use GitHub Codespaces**
+This repository already includes a `vercel.json` SPA rewrite so direct route refreshes work in production.
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Custom domain pattern
 
-## What technologies are used for this project?
+Recommended setup:
 
-This project is built with:
+- `www.yourdomain.com` -> Vercel frontend
+- `api` stays on Hugging Face initially, or later moves to a branded backend domain
+
+If you use a frontend custom domain, make sure the backend CORS configuration allows that frontend origin.
+
+## Stack
 
 - Vite
 - TypeScript
 - React
 - shadcn-ui
 - Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
