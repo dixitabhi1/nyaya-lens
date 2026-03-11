@@ -149,12 +149,18 @@ function ManualTab() {
 
 function UploadTab() {
   const [file, setFile] = useState<File | null>(null);
+  const [policeStation, setPoliceStation] = useState("");
   const [loading, setLoading] = useState(false);
   const [preview, setPreview] = useState<any>(null);
   const [submitted, setSubmitted] = useState<any>(null);
   const [error, setError] = useState("");
 
-  const makeForm = () => { const fd = new FormData(); if (file) fd.append("complaint_file", file); return fd; };
+  const makeForm = () => {
+    const fd = new FormData();
+    if (file) fd.append("complaint_file", file);
+    if (policeStation.trim()) fd.append("police_station", policeStation.trim());
+    return fd;
+  };
 
   const handlePreview = async () => {
     if (!file) return;
@@ -171,6 +177,7 @@ function UploadTab() {
   return (
     <div className="space-y-4">
       <FileUpload onFile={setFile} label="Upload complaint document" />
+      <Input placeholder="Police Station (optional)" value={policeStation} onChange={(e) => setPoliceStation(e.target.value)} />
       <div className="flex gap-2">
         <Button variant="outline" onClick={handlePreview} disabled={loading || !file}><Eye className="h-4 w-4 mr-2" /> Preview</Button>
         <Button onClick={handleSubmit} disabled={loading || !file}><Send className="h-4 w-4 mr-2" /> Submit</Button>
@@ -184,21 +191,31 @@ function UploadTab() {
 
 function VoiceTab() {
   const [file, setFile] = useState<File | null>(null);
+  const [transcriptText, setTranscriptText] = useState("");
+  const [policeStation, setPoliceStation] = useState("");
+  const [complainantName, setComplainantName] = useState("");
   const [loading, setLoading] = useState(false);
   const [preview, setPreview] = useState<any>(null);
   const [submitted, setSubmitted] = useState<any>(null);
   const [error, setError] = useState("");
 
-  const makeForm = () => { const fd = new FormData(); if (file) fd.append("audio_file", file); return fd; };
+  const makeForm = () => {
+    const fd = new FormData();
+    if (file) fd.append("audio_file", file);
+    if (transcriptText.trim()) fd.append("transcript_text", transcriptText.trim());
+    if (policeStation.trim()) fd.append("police_station", policeStation.trim());
+    if (complainantName.trim()) fd.append("complainant_name", complainantName.trim());
+    return fd;
+  };
 
   const handlePreview = async () => {
-    if (!file) return;
+    if (!file && !transcriptText.trim()) return;
     setLoading(true); setError("");
     try { setPreview(await firVoicePreview(makeForm())); } catch (e: any) { setError(e.message); } finally { setLoading(false); }
   };
 
   const handleSubmit = async () => {
-    if (!file) return;
+    if (!file && !transcriptText.trim()) return;
     setLoading(true); setError("");
     try { setSubmitted(await firVoiceSubmit(makeForm())); } catch (e: any) { setError(e.message); } finally { setLoading(false); }
   };
@@ -206,9 +223,14 @@ function VoiceTab() {
   return (
     <div className="space-y-4">
       <FileUpload onFile={setFile} accept="audio/*" label="Upload voice recording" />
+      <Textarea placeholder="Or paste transcript text" value={transcriptText} onChange={(e) => setTranscriptText(e.target.value)} rows={4} />
+      <div className="grid grid-cols-2 gap-3">
+        <Input placeholder="Police Station (optional)" value={policeStation} onChange={(e) => setPoliceStation(e.target.value)} />
+        <Input placeholder="Complainant Name (optional)" value={complainantName} onChange={(e) => setComplainantName(e.target.value)} />
+      </div>
       <div className="flex gap-2">
-        <Button variant="outline" onClick={handlePreview} disabled={loading || !file}><Eye className="h-4 w-4 mr-2" /> Preview</Button>
-        <Button onClick={handleSubmit} disabled={loading || !file}><Send className="h-4 w-4 mr-2" /> Submit</Button>
+        <Button variant="outline" onClick={handlePreview} disabled={loading || (!file && !transcriptText.trim())}><Eye className="h-4 w-4 mr-2" /> Preview</Button>
+        <Button onClick={handleSubmit} disabled={loading || (!file && !transcriptText.trim())}><Send className="h-4 w-4 mr-2" /> Submit</Button>
       </div>
       {loading && <LoadingState />}
       {error && <NoticeBanner variant="error">{error}</NoticeBanner>}
@@ -226,7 +248,7 @@ function SavedFIRs({ onOpen }: { onOpen: (firId: string) => void }) {
     setLoading(true); setError("");
     try {
       const data = await firList(25);
-      setFirs(Array.isArray(data) ? data : data?.firs || data?.items || []);
+      setFirs(Array.isArray(data) ? data : data?.records || data?.firs || data?.items || []);
     } catch (e: any) {
       setError(e.message);
     } finally { setLoading(false); }
@@ -253,19 +275,19 @@ function SavedFIRs({ onOpen }: { onOpen: (firId: string) => void }) {
                 {fir.case_strength_score !== undefined && (
                   <StatusPill label={`Strength: ${fir.case_strength_score}%`} variant="default" />
                 )}
-                {fir.version !== undefined && (
-                  <span className="text-xs text-muted-foreground bg-secondary px-1.5 py-0.5 rounded">v{fir.version}</span>
+                {(fir.current_version !== undefined || fir.version !== undefined) && (
+                  <span className="text-xs text-muted-foreground bg-secondary px-1.5 py-0.5 rounded">v{fir.current_version ?? fir.version}</span>
                 )}
               </div>
               <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
                 {fir.police_station && <span>🏛 {fir.police_station}</span>}
                 {fir.incident_date && <span>📅 {fir.incident_date}</span>}
                 {fir.incident_location && <span>📍 {fir.incident_location}</span>}
-                {fir.updated_at && <span>🕐 {new Date(fir.updated_at).toLocaleString()}</span>}
+                {(fir.last_edited_at || fir.updated_at) && <span>🕐 {new Date(fir.last_edited_at || fir.updated_at).toLocaleString()}</span>}
               </div>
-              {(fir.draft || fir.fir_draft) && (
+              {(fir.draft_excerpt || fir.draft || fir.fir_draft) && (
                 <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
-                  {(fir.draft || fir.fir_draft).slice(0, 150)}…
+                  {(fir.draft_excerpt || fir.draft || fir.fir_draft).slice(0, 150)}…
                 </p>
               )}
             </div>
@@ -296,7 +318,7 @@ function FIREditor({ firId, onClose }: { firId: string; onClose: () => void }) {
         firVersions(firId).catch(() => []),
       ]);
       setFir(firData);
-      setDraft(firData.draft || firData.fir_draft || "");
+      setDraft(firData.draft_text || firData.draft || firData.fir_draft || "");
       setVersions(Array.isArray(versionData) ? versionData : versionData?.versions || []);
     } catch (e: any) { setError(e.message); } finally { setLoading(false); }
   }, [firId]);
@@ -356,12 +378,12 @@ function FIREditor({ firId, onClose }: { firId: string; onClose: () => void }) {
           <div className="space-y-2">
             {versions.map((v: any, i: number) => (
               <div key={i} className="flex items-center gap-3 text-sm border-b last:border-0 pb-2 last:pb-0">
-                <Clock className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                <span className="text-muted-foreground">{v.version ? `v${v.version}` : `#${i + 1}`}</span>
+              <Clock className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                <span className="text-muted-foreground">{v.version_number ? `v${v.version_number}` : v.version ? `v${v.version}` : `#${i + 1}`}</span>
                 <span className="text-xs text-muted-foreground">
                   {v.created_at || v.timestamp ? new Date(v.created_at || v.timestamp).toLocaleString() : ""}
                 </span>
-                {v.changes_summary && <span className="text-xs truncate">{v.changes_summary}</span>}
+                {(v.edit_summary || v.changes_summary) && <span className="text-xs truncate">{v.edit_summary || v.changes_summary}</span>}
               </div>
             ))}
           </div>
