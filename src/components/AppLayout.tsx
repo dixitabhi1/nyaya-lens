@@ -1,8 +1,7 @@
 import { ReactNode } from "react";
 import { AppSidebar } from "./AppSidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { ExternalLink, Scale } from "lucide-react";
-import { SWAGGER_URL } from "@/services/api";
+import { Scale } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth-context";
 
@@ -29,14 +28,6 @@ export function AppLayout({ children }: { children: ReactNode }) {
                   <p className="text-xs text-muted-foreground">{user.role}</p>
                 </div>
               ) : null}
-              <a
-                href={SWAGGER_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-              >
-                API Docs <ExternalLink className="h-3 w-3" />
-              </a>
               <Button variant="outline" size="sm" onClick={() => void logout()}>
                 Logout
               </Button>
