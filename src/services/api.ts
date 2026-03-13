@@ -98,7 +98,22 @@ export type LawyerSummary = {
   bio: string;
   verified: boolean;
   verification_status: string;
+  follower_count: number;
+  article_count: number;
   public_url: string;
+};
+
+export type LawyerSocialUser = {
+  name: string;
+  role: string;
+};
+
+export type LawyerFollower = LawyerSocialUser & {
+  followed_at: string;
+};
+
+export type LawyerPostLike = LawyerSocialUser & {
+  liked_at: string;
 };
 
 export type LawyerReview = {
@@ -120,6 +135,9 @@ export type LawyerDetail = LawyerSummary & {
   case_experience: string[];
   reviews: LawyerReview[];
   articles: LawyerArticle[];
+  followers: LawyerFollower[];
+  is_following: boolean;
+  messaging_enabled: boolean;
   created_at: string;
   updated_at: string;
 };
@@ -132,6 +150,7 @@ export type LawyerDirectoryResponse = {
 };
 
 export type LawyerNetworkPost = {
+  id: number;
   handle: string;
   author: string;
   category: string;
@@ -140,6 +159,9 @@ export type LawyerNetworkPost = {
   like_count: number;
   comment_count: number;
   stats: string;
+  liked_by: LawyerPostLike[];
+  is_liked: boolean;
+  public_url: string;
   created_at: string;
 };
 
@@ -166,6 +188,33 @@ export type LawyerRegistrationPayload = {
 export type LawyerRegistrationResponse = {
   message: string;
   profile: LawyerDetail;
+};
+
+export type LawyerFollowersResponse = {
+  handle: string;
+  follower_count: number;
+  followers: LawyerFollower[];
+};
+
+export type LawyerFollowToggleResponse = {
+  handle: string;
+  following: boolean;
+  follower_count: number;
+  followers: LawyerFollower[];
+};
+
+export type LawyerPostLikeToggleResponse = {
+  post_id: number;
+  liked: boolean;
+  like_count: number;
+  liked_by: LawyerPostLike[];
+};
+
+export type LawyerPostCreatePayload = {
+  category: string;
+  title: string;
+  excerpt: string;
+  content?: string;
 };
 
 export type PoliceDashboardCard = {
@@ -196,6 +245,70 @@ export type PoliceDashboardResponse = {
   generated_at: string;
 };
 
+export type LawyerDashboardMetric = {
+  title: string;
+  value: string;
+  detail: string;
+};
+
+export type LawyerDashboardConversation = {
+  conversation_id: number;
+  counterpart_name: string;
+  counterpart_role: string;
+  preview: string;
+  unread_count: number;
+  last_message_at?: string | null;
+};
+
+export type LawyerDashboardResponse = {
+  metrics: LawyerDashboardMetric[];
+  recent_followers: LawyerFollower[];
+  top_posts: LawyerNetworkPost[];
+  recent_conversations: LawyerDashboardConversation[];
+  generated_at: string;
+};
+
+export type MessageParticipant = {
+  id: string;
+  full_name: string;
+  role: string;
+  email: string;
+  lawyer_handle?: string | null;
+  lawyer_verified: boolean;
+};
+
+export type MessageUserDirectoryResponse = {
+  users: MessageParticipant[];
+};
+
+export type DirectMessage = {
+  id: number;
+  conversation_id: number;
+  sender: MessageParticipant;
+  recipient: MessageParticipant;
+  content: string;
+  created_at: string;
+  read_at?: string | null;
+  is_mine: boolean;
+};
+
+export type ConversationSummary = {
+  id: number;
+  counterpart: MessageParticipant;
+  last_message_preview?: string | null;
+  last_message_at?: string | null;
+  unread_count: number;
+};
+
+export type ConversationListResponse = {
+  conversations: ConversationSummary[];
+};
+
+export type ConversationDetailResponse = {
+  conversation: ConversationSummary;
+  messages: DirectMessage[];
+};
+
 // Auth
 export const authRegister = (data: {
   email: string;
@@ -214,8 +327,11 @@ export const getHistory = (category?: string, limit = 20) =>
   get<any>(`/history?limit=${limit}${category ? `&category=${encodeURIComponent(category)}` : ""}`);
 
 // Chat
-export const chatQuery = (question: string, language = "en") =>
-  post<any>("/chat/query", { question, language });
+export const chatQuery = (
+  question: string,
+  language = "en",
+  history: Array<{ role: string; content: string }> = [],
+) => post<any>("/chat/query", { question, language, history });
 
 // Case Analysis
 export const analyzeCase = (data: any) => post<any>("/analysis/case", data);
@@ -284,3 +400,43 @@ export const registerLawyerProfile = (data: LawyerRegistrationPayload) =>
 
 export const getPoliceDashboard = (limit = 8) =>
   get<PoliceDashboardResponse>(`/lawyers/police/dashboard?limit=${limit}`);
+
+export const getLawyerFollowers = (handle: string, limit = 50) =>
+  get<LawyerFollowersResponse>(`/lawyers/${encodeURIComponent(handle.replace(/^@/, ""))}/followers?limit=${limit}`);
+
+export const toggleLawyerFollow = (handle: string) =>
+  post<LawyerFollowToggleResponse>(`/lawyers/${encodeURIComponent(handle.replace(/^@/, ""))}/follow`, {});
+
+export const toggleLawyerPostLike = (postId: number) =>
+  post<LawyerPostLikeToggleResponse>(`/lawyers/network/posts/${postId}/like`, {});
+
+export const createLawyerNetworkPost = (data: LawyerPostCreatePayload) =>
+  post<LawyerNetworkPostResponse>("/lawyers/network/posts", data);
+
+export const getLawyerDashboard = () =>
+  get<LawyerDashboardResponse>("/lawyers/dashboard/me");
+
+export const listMessageUsers = (query?: string, limit = 20) =>
+  get<MessageUserDirectoryResponse>(
+    `/messages/users?limit=${limit}${query ? `&query=${encodeURIComponent(query)}` : ""}`,
+  );
+
+export const listConversations = () =>
+  get<ConversationListResponse>("/messages/conversations");
+
+export const startConversation = (participantId: string) =>
+  post<ConversationDetailResponse>("/messages/conversations", { participant_id: participantId });
+
+export const startConversationWithLawyer = (handle: string) =>
+  post<ConversationDetailResponse>(`/messages/lawyer/${encodeURIComponent(handle.replace(/^@/, ""))}`, {});
+
+export const getConversation = (conversationId: number) =>
+  get<ConversationDetailResponse>(`/messages/conversations/${conversationId}`);
+
+export const sendConversationMessage = (conversationId: number, content: string) =>
+  post<DirectMessage>(`/messages/conversations/${conversationId}/messages`, { content });
+
+export function createMessagesWebSocket(token: string): WebSocket {
+  const wsBase = BASE_URL.replace(/^http/i, (protocol) => (protocol.toLowerCase() === "https" ? "wss" : "ws"));
+  return new WebSocket(`${wsBase}/messages/ws?token=${encodeURIComponent(token)}`);
+}

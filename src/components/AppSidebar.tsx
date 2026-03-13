@@ -1,6 +1,7 @@
 import {
   LayoutDashboard,
   MessageSquare,
+  MessagesSquare,
   Search,
   Mic,
   UserRoundSearch,
@@ -35,6 +36,7 @@ const platformModules = [
   { title: "Case Analysis", url: "/case-analysis", icon: Search },
   { title: "Find Lawyers", url: "/lawyers", icon: UserRoundSearch },
   { title: "Lawyer Network", url: "/lawyer-network", icon: Network },
+  { title: "Messages", url: "/messages", icon: MessagesSquare },
   { title: "Bare Acts", url: "/research", icon: BookOpenText },
   { title: "Legal Vault", url: "/contracts", icon: ShieldCheck },
   { title: "Track Case", url: "/strength", icon: TrendingUp },
@@ -43,6 +45,7 @@ const platformModules = [
 const operationsModules = [
   { title: "Document Drafting", url: "/drafting", icon: PenTool },
   { title: "Evidence Analyzer", url: "/evidence", icon: Microscope },
+  { title: "Lawyer Dashboard", url: "/lawyer-dashboard", icon: MessageSquare },
   { title: "Police Dashboard", url: "/police-dashboard", icon: Landmark },
 ];
 

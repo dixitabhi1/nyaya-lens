@@ -1,13 +1,20 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
-import { BadgeCheck, BookOpenText, MessageSquare, Star } from "lucide-react";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { BadgeCheck, BookOpenText, MessageSquare, Star, Users } from "lucide-react";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/lib/auth-context";
 import { fallbackLawyerDetail } from "@/lib/nyayasetu-data";
-import { getLawyerProfile, type LawyerDetail } from "@/services/api";
+import {
+  getLawyerProfile,
+  startConversationWithLawyer,
+  toggleLawyerFollow,
+  type LawyerDetail,
+} from "@/services/api";
 
 function initials(name: string) {
   return name
@@ -20,9 +27,13 @@ function initials(name: string) {
 
 export default function LawyerProfilePage() {
   const { handle = "" } = useParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [lawyer, setLawyer] = useState<LawyerDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [usingFallback, setUsingFallback] = useState(false);
+  const [followLoading, setFollowLoading] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -54,6 +65,50 @@ export default function LawyerProfilePage() {
       active = false;
     };
   }, [handle]);
+
+  async function handleFollow() {
+    if (!lawyer) {
+      return;
+    }
+    try {
+      setFollowLoading(true);
+      const result = await toggleLawyerFollow(lawyer.handle);
+      setLawyer((prev) =>
+        prev
+          ? {
+              ...prev,
+              is_following: result.following,
+              follower_count: result.follower_count,
+              followers: result.followers,
+            }
+          : prev,
+      );
+    } catch (err: any) {
+      toast({
+        title: "Unable to update follow state",
+        description: err?.message || "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setFollowLoading(false);
+    }
+  }
+
+  async function handleMessage() {
+    if (!lawyer) {
+      return;
+    }
+    try {
+      const detail = await startConversationWithLawyer(lawyer.handle);
+      navigate(`/messages?conversation=${detail.conversation.id}`);
+    } catch (err: any) {
+      toast({
+        title: "Unable to start chat",
+        description: err?.message || "Please try again later.",
+        variant: "destructive",
+      });
+    }
+  }
 
   if (loading) {
     return (
@@ -120,9 +175,25 @@ export default function LawyerProfilePage() {
             </div>
             <div className="flex flex-col gap-3">
               <Button className="rounded-full bg-amber-300 text-slate-950 hover:bg-amber-200">Book Consultation</Button>
-              <Button variant="outline" className="rounded-full border-white/20 bg-white/5 text-white hover:bg-white/10">
-                Send Message
+              <Button
+                type="button"
+                onClick={() => void handleMessage()}
+                disabled={!lawyer.messaging_enabled}
+                variant="outline"
+                className="rounded-full border-white/20 bg-white/5 text-white hover:bg-white/10"
+              >
+                {lawyer.messaging_enabled ? "Send Message" : "Messaging Unlocks After Account Link"}
               </Button>
+              {user ? (
+                <Button
+                  type="button"
+                  onClick={() => void handleFollow()}
+                  disabled={followLoading}
+                  className="rounded-full bg-white text-slate-950 hover:bg-slate-100"
+                >
+                  {lawyer.is_following ? "Following" : "Follow Lawyer"}
+                </Button>
+              ) : null}
             </div>
           </CardContent>
         </Card>
@@ -185,6 +256,7 @@ export default function LawyerProfilePage() {
                   <div><span className="font-semibold text-slate-950">Courts:</span> {lawyer.courts}</div>
                   <div><span className="font-semibold text-slate-950">Languages:</span> {lawyer.languages.join(", ")}</div>
                   <div><span className="font-semibold text-slate-950">Consultation:</span> {lawyer.fee}</div>
+                  <div><span className="font-semibold text-slate-950">Followers:</span> {lawyer.follower_count}</div>
                 </div>
               </CardContent>
             </Card>
@@ -220,6 +292,27 @@ export default function LawyerProfilePage() {
                   <h2 className="text-2xl font-semibold text-slate-950">Public handle</h2>
                 </div>
                 <p className="text-sm leading-7 text-slate-700">Profile URL: {lawyer.public_url}</p>
+              </CardContent>
+            </Card>
+
+            <Card className="rounded-[28px] border-slate-200 bg-white shadow-lg shadow-slate-200/40">
+              <CardContent className="space-y-4 p-6">
+                <div className="flex items-center gap-3">
+                  <Users className="h-5 w-5 text-slate-700" />
+                  <h2 className="text-2xl font-semibold text-slate-950">Followers</h2>
+                </div>
+                <div className="space-y-3">
+                  {lawyer.followers.length > 0 ? lawyer.followers.map((follower) => (
+                    <div key={`${follower.name}-${follower.followed_at}`} className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
+                      <p className="font-semibold text-slate-950">{follower.name}</p>
+                      <p className="mt-1 text-sm text-slate-500">{follower.role}</p>
+                    </div>
+                  )) : (
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm leading-7 text-slate-600">
+                      Follower activity will appear here as citizens, police officers, and lawyers follow this profile.
+                    </div>
+                  )}
+                </div>
               </CardContent>
             </Card>
           </div>

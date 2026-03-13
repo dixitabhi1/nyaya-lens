@@ -32,7 +32,11 @@ export default function ChatPage() {
     setLoading(true);
     setError("");
     try {
-      const res = await chatQuery(question);
+      const history = messages.flatMap((message) => [
+        { role: "user", content: message.question },
+        { role: "assistant", content: message.answer },
+      ]);
+      const res = await chatQuery(question, "en", history);
       setMessages((prev) => [...prev, { question, ...res }]);
       setQuestion("");
     } catch (e: any) {

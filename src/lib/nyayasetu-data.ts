@@ -300,6 +300,8 @@ export const fallbackLawyerSummaries: LawyerSummary[] = lawyerProfiles.map((lawy
   bio: lawyer.bio,
   verified: lawyer.verified,
   verification_status: lawyer.verified ? "verified" : "pending",
+  follower_count: 0,
+  article_count: lawyer.articles.length,
   public_url: `nyayasetu.in/lawyer/@${lawyer.handle}`,
 }));
 
@@ -312,9 +314,10 @@ export const fallbackLawyerDirectoryResponse: LawyerDirectoryResponse = {
 };
 
 export const fallbackLawyerNetworkFeedResponse: LawyerNetworkFeedResponse = {
-  posts: lawyerFeedPosts.map((post) => {
+  posts: lawyerFeedPosts.map((post, index) => {
     const statsMatch = post.stats.match(/(\d+)\s+likes\s+\|\s+(\d+)\s+comments/i);
     return {
+      id: index + 1,
       handle: post.handle,
       author: post.author,
       category: post.category,
@@ -323,6 +326,9 @@ export const fallbackLawyerNetworkFeedResponse: LawyerNetworkFeedResponse = {
       like_count: statsMatch ? Number.parseInt(statsMatch[1], 10) : 0,
       comment_count: statsMatch ? Number.parseInt(statsMatch[2], 10) : 0,
       stats: post.stats,
+      liked_by: [],
+      is_liked: false,
+      public_url: `nyayasetu.in/lawyer/@${post.handle}`,
       created_at: new Date(2026, 0, 1).toISOString(),
     };
   }),
@@ -350,6 +356,8 @@ export function fallbackLawyerDetail(handle: string): LawyerDetail | undefined {
     bio: lawyer.bio,
     verified: lawyer.verified,
     verification_status: lawyer.verified ? "verified" : "pending",
+    follower_count: 0,
+    article_count: lawyer.articles.length,
     public_url: `nyayasetu.in/lawyer/@${lawyer.handle}`,
     about: lawyer.about,
     case_experience: lawyer.caseExperience,
@@ -365,6 +373,9 @@ export function fallbackLawyerDetail(handle: string): LawyerDetail | undefined {
       excerpt: article.excerpt,
       created_at: new Date(2026, 0, 1).toISOString(),
     })),
+    followers: [],
+    is_following: false,
+    messaging_enabled: false,
     created_at: new Date(2026, 0, 1).toISOString(),
     updated_at: new Date(2026, 0, 1).toISOString(),
   };

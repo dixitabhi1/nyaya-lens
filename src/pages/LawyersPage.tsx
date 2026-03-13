@@ -175,6 +175,7 @@ export default function LawyersPage() {
                     <p>{lawyer.experience} experience</p>
                     <p>{lawyer.city}</p>
                     <p>{lawyer.languages.join(", ")}</p>
+                    <p>{lawyer.follower_count} followers</p>
                   </div>
 
                   <div className="flex items-center justify-between border-t border-slate-100 pt-4 text-sm">
