@@ -13,6 +13,7 @@ Recommended deployment split:
 
 Create a local `.env` file or add these in Vercel:
 
+
 ```bash
 VITE_API_BASE_URL=https://abhishek785-nyaya-setu.hf.space/api/v1
 VITE_SWAGGER_URL=https://abhishek785-nyaya-setu.hf.space/docs
