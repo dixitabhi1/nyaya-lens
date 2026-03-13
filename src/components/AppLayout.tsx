@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import { Link } from "react-router-dom";
 import { AppSidebar } from "./AppSidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Scale } from "lucide-react";
@@ -27,10 +28,26 @@ export function AppLayout({ children }: { children: ReactNode }) {
                   <p className="text-sm font-medium text-foreground">{user.full_name}</p>
                   <p className="text-xs text-muted-foreground">{user.role}</p>
                 </div>
-              ) : null}
-              <Button variant="outline" size="sm" onClick={() => void logout()}>
-                Logout
-              </Button>
+              ) : (
+                <div className="hidden md:block text-right">
+                  <p className="text-sm font-medium text-foreground">Public platform view</p>
+                  <p className="text-xs text-muted-foreground">Sign in for AI workflows and saved history</p>
+                </div>
+              )}
+              {user ? (
+                <Button variant="outline" size="sm" onClick={() => void logout()}>
+                  Logout
+                </Button>
+              ) : (
+                <>
+                  <Button asChild variant="ghost" size="sm" className="hidden md:inline-flex">
+                    <Link to="/login">Sign In</Link>
+                  </Button>
+                  <Button asChild size="sm" className="bg-slate-950 text-amber-50 hover:bg-slate-900">
+                    <Link to="/register">Create Account</Link>
+                  </Button>
+                </>
+              )}
             </div>
           </header>
           <main className="flex-1 overflow-auto">{children}</main>

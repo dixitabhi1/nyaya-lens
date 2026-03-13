@@ -1,16 +1,20 @@
 import {
+  LayoutDashboard,
   MessageSquare,
   Search,
-  FileText,
-  PenTool,
+  Mic,
+  UserRoundSearch,
+  Network,
+  BookOpenText,
   ShieldCheck,
-  Microscope,
   FileWarning,
   TrendingUp,
+  PenTool,
+  Microscope,
+  Landmark,
   Scale,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
-import { useLocation } from "react-router-dom";
 import {
   Sidebar,
   SidebarContent,
@@ -23,21 +27,28 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
-const modules = [
-  { title: "AI Legal Chatbot", url: "/chat", icon: MessageSquare },
+const platformModules = [
+  { title: "Home", url: "/dashboard", icon: LayoutDashboard },
+  { title: "AI Legal Assistant", url: "/chat", icon: MessageSquare },
+  { title: "File Complaint", url: "/fir", icon: FileWarning },
+  { title: "Voice FIR", url: "/fir", icon: Mic },
   { title: "Case Analysis", url: "/case-analysis", icon: Search },
-  { title: "Legal Research", url: "/research", icon: FileText },
+  { title: "Find Lawyers", url: "/lawyers", icon: UserRoundSearch },
+  { title: "Lawyer Network", url: "/lawyer-network", icon: Network },
+  { title: "Bare Acts", url: "/research", icon: BookOpenText },
+  { title: "Legal Vault", url: "/contracts", icon: ShieldCheck },
+  { title: "Track Case", url: "/strength", icon: TrendingUp },
+];
+
+const operationsModules = [
   { title: "Document Drafting", url: "/drafting", icon: PenTool },
-  { title: "Contract Analysis", url: "/contracts", icon: ShieldCheck },
   { title: "Evidence Analyzer", url: "/evidence", icon: Microscope },
-  { title: "FIR Generator", url: "/fir", icon: FileWarning },
-  { title: "Case Strength", url: "/strength", icon: TrendingUp },
+  { title: "Police Dashboard", url: "/police-dashboard", icon: Landmark },
 ];
 
 export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
-  const location = useLocation();
 
   return (
     <Sidebar collapsible="icon">
@@ -56,11 +67,33 @@ export function AppSidebar() {
           </div>
         )}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-sidebar-foreground/50 text-[10px] uppercase tracking-widest">Modules</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-sidebar-foreground/50 text-[10px] uppercase tracking-widest">Platform</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {modules.map((item) => (
-                <SidebarMenuItem key={item.url}>
+              {platformModules.map((item) => (
+                <SidebarMenuItem key={`${item.title}-${item.url}`}>
+                  <SidebarMenuButton asChild>
+                    <NavLink
+                      to={item.url}
+                      end
+                      className="hover:bg-sidebar-accent/60 transition-colors"
+                      activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-semibold"
+                    >
+                      <item.icon className="mr-2 h-4 w-4 shrink-0" />
+                      {!collapsed && <span className="text-sm">{item.title}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-sidebar-foreground/50 text-[10px] uppercase tracking-widest">Operations</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {operationsModules.map((item) => (
+                <SidebarMenuItem key={`${item.title}-${item.url}`}>
                   <SidebarMenuButton asChild>
                     <NavLink
                       to={item.url}

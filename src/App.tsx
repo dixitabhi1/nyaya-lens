@@ -18,6 +18,12 @@ import FIRPage from "./pages/FIRPage";
 import StrengthPage from "./pages/StrengthPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
+import DashboardPage from "./pages/DashboardPage";
+import LawyersPage from "./pages/LawyersPage";
+import LawyerNetworkPage from "./pages/LawyerNetworkPage";
+import LawyerRegisterPage from "./pages/LawyerRegisterPage";
+import LawyerProfilePage from "./pages/LawyerProfilePage";
+import PoliceDashboardPage from "./pages/PoliceDashboardPage";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +38,12 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/dashboard" element={<AppLayout><DashboardPage /></AppLayout>} />
+            <Route path="/lawyers" element={<AppLayout><LawyersPage /></AppLayout>} />
+            <Route path="/lawyers/join" element={<AppLayout><LawyerRegisterPage /></AppLayout>} />
+            <Route path="/lawyer/:handle" element={<AppLayout><LawyerProfilePage /></AppLayout>} />
+            <Route path="/lawyer-network" element={<AppLayout><LawyerNetworkPage /></AppLayout>} />
+            <Route path="/police-dashboard" element={<AppLayout><PoliceDashboardPage /></AppLayout>} />
             <Route path="/chat" element={<ProtectedRoute><AppLayout><ChatPage /></AppLayout></ProtectedRoute>} />
             <Route path="/case-analysis" element={<ProtectedRoute><AppLayout><CaseAnalysisPage /></AppLayout></ProtectedRoute>} />
             <Route path="/research" element={<ProtectedRoute><AppLayout><ResearchPage /></AppLayout></ProtectedRoute>} />

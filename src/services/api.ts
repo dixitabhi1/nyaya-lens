@@ -82,6 +82,120 @@ function put<T>(path: string, body: unknown): Promise<T> {
   return request<T>(path, { method: "PUT", body: JSON.stringify(body) });
 }
 
+export type LawyerSummary = {
+  handle: string;
+  name: string;
+  bar_council_id: string;
+  years_of_practice: number;
+  experience: string;
+  specialization: string;
+  courts: string;
+  city: string;
+  languages: string[];
+  fee: string;
+  rating: number;
+  review_count: number;
+  bio: string;
+  verified: boolean;
+  verification_status: string;
+  public_url: string;
+};
+
+export type LawyerReview = {
+  author: string;
+  text: string;
+  rating: number;
+  created_at: string;
+};
+
+export type LawyerArticle = {
+  category: string;
+  title: string;
+  excerpt: string;
+  created_at: string;
+};
+
+export type LawyerDetail = LawyerSummary & {
+  about: string;
+  case_experience: string[];
+  reviews: LawyerReview[];
+  articles: LawyerArticle[];
+  created_at: string;
+  updated_at: string;
+};
+
+export type LawyerDirectoryResponse = {
+  lawyers: LawyerSummary[];
+  total_lawyers: number;
+  average_rating: number;
+  verified_percentage: number;
+};
+
+export type LawyerNetworkPost = {
+  handle: string;
+  author: string;
+  category: string;
+  title: string;
+  excerpt: string;
+  like_count: number;
+  comment_count: number;
+  stats: string;
+  created_at: string;
+};
+
+export type LawyerNetworkFeedResponse = {
+  posts: LawyerNetworkPost[];
+};
+
+export type LawyerRegistrationPayload = {
+  handle: string;
+  name: string;
+  bar_council_id: string;
+  years_of_practice: number;
+  specialization: string;
+  courts_practiced_in: string;
+  city: string;
+  languages: string[];
+  consultation_fee: string;
+  profile_photo_url?: string;
+  bio: string;
+  about?: string;
+  case_experience: string[];
+};
+
+export type LawyerRegistrationResponse = {
+  message: string;
+  profile: LawyerDetail;
+};
+
+export type PoliceDashboardCard = {
+  title: string;
+  value: string;
+  detail: string;
+};
+
+export type PoliceQueueItem = {
+  fir_id: string;
+  title: string;
+  status: string;
+  detail: string;
+  workflow: string;
+  police_station?: string | null;
+  last_edited_at: string;
+};
+
+export type PoliceHotspotAlert = {
+  title: string;
+  detail: string;
+};
+
+export type PoliceDashboardResponse = {
+  cards: PoliceDashboardCard[];
+  queue: PoliceQueueItem[];
+  hotspot_alerts: PoliceHotspotAlert[];
+  generated_at: string;
+};
+
 // Auth
 export const authRegister = (data: {
   email: string;
@@ -139,3 +253,34 @@ export const firList = (limit = 25) => get<any>(`/fir?limit=${limit}`);
 
 // Case Strength
 export const predictStrength = (data: any) => post<any>("/analysis/strength", data);
+
+export const getLawyers = (params?: {
+  query?: string;
+  city?: string;
+  specialization?: string;
+  minYears?: number;
+  verifiedOnly?: boolean;
+  limit?: number;
+}) => {
+  const search = new URLSearchParams();
+  if (params?.query) search.set("query", params.query);
+  if (params?.city) search.set("city", params.city);
+  if (params?.specialization) search.set("specialization", params.specialization);
+  if (typeof params?.minYears === "number") search.set("min_years", String(params.minYears));
+  if (typeof params?.verifiedOnly === "boolean") search.set("verified_only", String(params.verifiedOnly));
+  if (typeof params?.limit === "number") search.set("limit", String(params.limit));
+  const suffix = search.toString() ? `?${search.toString()}` : "";
+  return get<LawyerDirectoryResponse>(`/lawyers${suffix}`);
+};
+
+export const getLawyerProfile = (handle: string) =>
+  get<LawyerDetail>(`/lawyers/${encodeURIComponent(handle.replace(/^@/, ""))}`);
+
+export const getLawyerNetworkFeed = (limit = 20) =>
+  get<LawyerNetworkFeedResponse>(`/lawyers/network/feed?limit=${limit}`);
+
+export const registerLawyerProfile = (data: LawyerRegistrationPayload) =>
+  post<LawyerRegistrationResponse>("/lawyers/register", data);
+
+export const getPoliceDashboard = (limit = 8) =>
+  get<PoliceDashboardResponse>(`/lawyers/police/dashboard?limit=${limit}`);
