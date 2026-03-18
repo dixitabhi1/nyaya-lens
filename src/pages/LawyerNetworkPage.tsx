@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/lib/auth-context";
+import { mergeLawyerDirectoryWithCache } from "@/lib/lawyer-cache";
 import {
   fallbackLawyerDirectoryResponse,
   fallbackLawyerNetworkFeedResponse,
@@ -26,7 +27,9 @@ export default function LawyerNetworkPage() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [posts, setPosts] = useState<LawyerNetworkPost[]>(fallbackLawyerNetworkFeedResponse.posts);
-  const [lawyers, setLawyers] = useState<LawyerSummary[]>(fallbackLawyerDirectoryResponse.lawyers);
+  const [lawyers, setLawyers] = useState<LawyerSummary[]>(
+    mergeLawyerDirectoryWithCache(fallbackLawyerDirectoryResponse).lawyers,
+  );
   const [usingFallback, setUsingFallback] = useState(false);
   const [draft, setDraft] = useState("");
   const [posting, setPosting] = useState(false);
@@ -44,14 +47,14 @@ export default function LawyerNetworkPage() {
           return;
         }
         setPosts(feed.posts);
-        setLawyers(directory.lawyers);
+        setLawyers(mergeLawyerDirectoryWithCache(directory).lawyers);
         setUsingFallback(false);
       } catch {
         if (!active) {
           return;
         }
         setPosts(fallbackLawyerNetworkFeedResponse.posts);
-        setLawyers(fallbackLawyerDirectoryResponse.lawyers);
+        setLawyers(mergeLawyerDirectoryWithCache(fallbackLawyerDirectoryResponse).lawyers);
         setUsingFallback(true);
       }
     }

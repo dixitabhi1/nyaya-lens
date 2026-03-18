@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { AppSidebar } from "./AppSidebar";
+import { InboxNotifications } from "./InboxNotifications";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Scale } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -35,9 +36,12 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 </div>
               )}
               {user ? (
-                <Button variant="outline" size="sm" onClick={() => void logout()}>
-                  Logout
-                </Button>
+                <>
+                  <InboxNotifications />
+                  <Button variant="outline" size="sm" onClick={() => void logout()}>
+                    Logout
+                  </Button>
+                </>
               ) : (
                 <>
                   <Button asChild variant="ghost" size="sm" className="hidden md:inline-flex">

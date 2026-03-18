@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/lib/auth-context";
+import { mergeLawyerDirectoryWithCache } from "@/lib/lawyer-cache";
 import {
   dashboardCards,
   fallbackLawyerDirectoryResponse,
@@ -21,7 +22,9 @@ import {
 
 export default function DashboardPage() {
   const { user } = useAuth();
-  const [lawyers, setLawyers] = useState<LawyerSummary[]>(fallbackLawyerDirectoryResponse.lawyers);
+  const [lawyers, setLawyers] = useState<LawyerSummary[]>(
+    mergeLawyerDirectoryWithCache(fallbackLawyerDirectoryResponse).lawyers,
+  );
   const [policeCards, setPoliceCards] = useState<PoliceDashboardCard[]>(fallbackPoliceDashboardResponse.cards);
   const [usingFallback, setUsingFallback] = useState(false);
 
@@ -37,14 +40,14 @@ export default function DashboardPage() {
         if (!active) {
           return;
         }
-        setLawyers(directory.lawyers);
+        setLawyers(mergeLawyerDirectoryWithCache(directory).lawyers);
         setPoliceCards(police.cards);
         setUsingFallback(false);
       } catch {
         if (!active) {
           return;
         }
-        setLawyers(fallbackLawyerDirectoryResponse.lawyers);
+        setLawyers(mergeLawyerDirectoryWithCache(fallbackLawyerDirectoryResponse).lawyers);
         setPoliceCards(fallbackPoliceDashboardResponse.cards);
         setUsingFallback(true);
       }

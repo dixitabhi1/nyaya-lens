@@ -16,6 +16,7 @@ import {
   Scale,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
+import { useInbox } from "@/lib/inbox-context";
 import {
   Sidebar,
   SidebarContent,
@@ -51,6 +52,7 @@ const operationsModules = [
 
 export function AppSidebar() {
   const { state } = useSidebar();
+  const { unreadCount } = useInbox();
   const collapsed = state === "collapsed";
 
   return (
@@ -105,7 +107,16 @@ export function AppSidebar() {
                       activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-semibold"
                     >
                       <item.icon className="mr-2 h-4 w-4 shrink-0" />
-                      {!collapsed && <span className="text-sm">{item.title}</span>}
+                      {!collapsed && (
+                        <span className="flex items-center gap-2 text-sm">
+                          <span>{item.title}</span>
+                          {item.url === "/messages" && unreadCount > 0 ? (
+                            <span className="rounded-full bg-rose-500 px-2 py-0.5 text-[10px] font-semibold text-white">
+                              {unreadCount > 9 ? "9+" : unreadCount}
+                            </span>
+                          ) : null}
+                        </span>
+                      )}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

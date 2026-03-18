@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { upsertCachedLawyerProfile } from "@/lib/lawyer-cache";
 import { useToast } from "@/components/ui/use-toast";
 import { registerLawyerProfile } from "@/services/api";
 
@@ -73,7 +74,10 @@ export default function LawyerRegisterPage() {
         title: "Profile submitted",
         description: response.message,
       });
-      navigate(`/lawyer/${response.profile.handle}`);
+      upsertCachedLawyerProfile(response.profile);
+      navigate(`/lawyer/${response.profile.handle}`, {
+        state: { initialProfile: response.profile },
+      });
     } catch (error) {
       toast({
         title: "Unable to submit profile",

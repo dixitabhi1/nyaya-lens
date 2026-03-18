@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { BadgeCheck, BookOpenText, MessageSquare, Star, Users } from "lucide-react";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -8,10 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/lib/auth-context";
+import { useInbox } from "@/lib/inbox-context";
+import { getCachedLawyerProfile, upsertCachedLawyerProfile } from "@/lib/lawyer-cache";
 import { fallbackLawyerDetail } from "@/lib/nyayasetu-data";
 import {
   getLawyerProfile,
-  startConversationWithLawyer,
   toggleLawyerFollow,
   type LawyerDetail,
 } from "@/services/api";
@@ -27,13 +28,28 @@ function initials(name: string) {
 
 export default function LawyerProfilePage() {
   const { handle = "" } = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { startConversationWithLawyerHandle } = useInbox();
   const { toast } = useToast();
-  const [lawyer, setLawyer] = useState<LawyerDetail | null>(null);
-  const [loading, setLoading] = useState(true);
+  const initialProfile =
+    (location.state as { initialProfile?: LawyerDetail } | null)?.initialProfile ??
+    getCachedLawyerProfile(handle);
+  const [lawyer, setLawyer] = useState<LawyerDetail | null>(initialProfile ?? null);
+  const [loading, setLoading] = useState(!initialProfile);
   const [usingFallback, setUsingFallback] = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
+
+  useEffect(() => {
+    const cachedProfile =
+      (location.state as { initialProfile?: LawyerDetail } | null)?.initialProfile ??
+      getCachedLawyerProfile(handle);
+    if (cachedProfile) {
+      setLawyer(cachedProfile);
+      setLoading(false);
+    }
+  }, [handle, location.state]);
 
   useEffect(() => {
     let active = true;
@@ -46,6 +62,7 @@ export default function LawyerProfilePage() {
           return;
         }
         setLawyer(profile);
+        upsertCachedLawyerProfile(profile);
         setUsingFallback(false);
       } catch {
         if (!active) {
@@ -73,16 +90,19 @@ export default function LawyerProfilePage() {
     try {
       setFollowLoading(true);
       const result = await toggleLawyerFollow(lawyer.handle);
-      setLawyer((prev) =>
-        prev
-          ? {
-              ...prev,
-              is_following: result.following,
-              follower_count: result.follower_count,
-              followers: result.followers,
-            }
-          : prev,
-      );
+      setLawyer((prev) => {
+        if (!prev) {
+          return prev;
+        }
+        const next = {
+          ...prev,
+          is_following: result.following,
+          follower_count: result.follower_count,
+          followers: result.followers,
+        };
+        upsertCachedLawyerProfile(next);
+        return next;
+      });
     } catch (err: any) {
       toast({
         title: "Unable to update follow state",
@@ -99,7 +119,7 @@ export default function LawyerProfilePage() {
       return;
     }
     try {
-      const detail = await startConversationWithLawyer(lawyer.handle);
+      const detail = await startConversationWithLawyerHandle(lawyer.handle);
       navigate(`/messages?conversation=${detail.conversation.id}`);
     } catch (err: any) {
       toast({

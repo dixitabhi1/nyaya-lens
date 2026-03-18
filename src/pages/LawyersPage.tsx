@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { mergeLawyerDirectoryWithCache } from "@/lib/lawyer-cache";
 import { fallbackLawyerDirectoryResponse, fallbackLawyerSummaries } from "@/lib/nyayasetu-data";
 import { getLawyers, type LawyerDirectoryResponse } from "@/services/api";
 
@@ -54,7 +55,9 @@ function buildFallbackDirectory(query: string): LawyerDirectoryResponse {
 export default function LawyersPage() {
   const [query, setQuery] = useState("");
   const deferredQuery = useDeferredValue(query);
-  const [directory, setDirectory] = useState<LawyerDirectoryResponse>(fallbackLawyerDirectoryResponse);
+  const [directory, setDirectory] = useState<LawyerDirectoryResponse>(
+    mergeLawyerDirectoryWithCache(fallbackLawyerDirectoryResponse),
+  );
   const [loading, setLoading] = useState(true);
   const [usingFallback, setUsingFallback] = useState(false);
 
@@ -71,13 +74,13 @@ export default function LawyersPage() {
         if (!active) {
           return;
         }
-        setDirectory(data);
+        setDirectory(mergeLawyerDirectoryWithCache(data));
         setUsingFallback(false);
       } catch {
         if (!active) {
           return;
         }
-        setDirectory(buildFallbackDirectory(deferredQuery));
+        setDirectory(mergeLawyerDirectoryWithCache(buildFallbackDirectory(deferredQuery)));
         setUsingFallback(true);
       } finally {
         if (active) {

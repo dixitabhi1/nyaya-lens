@@ -7,17 +7,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/lib/auth-context";
+import { useInbox } from "@/lib/inbox-context";
 import {
-  createMessagesWebSocket,
-  getConversation,
-  listConversations,
   listMessageUsers,
-  sendConversationMessage,
-  startConversation,
-  startConversationWithLawyer,
-  type ConversationDetailResponse,
-  type ConversationSummary,
-  type DirectMessage,
   type MessageParticipant,
 } from "@/services/api";
 
@@ -26,49 +18,33 @@ function formatRole(role: string) {
 }
 
 export default function MessagesPage() {
-  const { token, user } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
+  const {
+    activeConversationId,
+    conversations,
+    isBootstrapping,
+    messagesByConversation,
+    openConversation,
+    sendMessage,
+    setActiveConversationId,
+    startConversationWithLawyerHandle,
+    startConversationWithParticipant,
+  } = useInbox();
   const [searchParams, setSearchParams] = useSearchParams();
   const [query, setQuery] = useState("");
   const deferredQuery = useDeferredValue(query);
   const [participants, setParticipants] = useState<MessageParticipant[]>([]);
-  const [conversations, setConversations] = useState<ConversationSummary[]>([]);
-  const [activeConversation, setActiveConversation] = useState<ConversationDetailResponse | null>(null);
   const [message, setMessage] = useState("");
   const [loadingConversation, setLoadingConversation] = useState(false);
   const [sending, setSending] = useState(false);
 
-  useEffect(() => {
-    let active = true;
-
-    async function bootstrap() {
-      try {
-        const [conversationList, userDirectory] = await Promise.all([
-          listConversations(),
-          listMessageUsers(undefined, 12),
-        ]);
-        if (!active) {
-          return;
-        }
-        setConversations(conversationList.conversations);
-        setParticipants(userDirectory.users);
-      } catch (err: any) {
-        if (!active) {
-          return;
-        }
-        toast({
-          title: "Messages unavailable",
-          description: err?.message || "Unable to load conversations right now.",
-          variant: "destructive",
-        });
-      }
-    }
-
-    void bootstrap();
-    return () => {
-      active = false;
-    };
-  }, [toast]);
+  const requestedConversationId = Number(searchParams.get("conversation") || "");
+  const selectedConversationId =
+    Number.isFinite(requestedConversationId) && requestedConversationId > 0
+      ? requestedConversationId
+      : activeConversationId;
+  const requestedLawyerHandle = searchParams.get("lawyer");
 
   useEffect(() => {
     let active = true;
@@ -95,81 +71,22 @@ export default function MessagesPage() {
   }, [deferredQuery]);
 
   useEffect(() => {
-    if (!token) {
-      return undefined;
-    }
-    const socket = createMessagesWebSocket(token);
-    socket.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        if (data?.type !== "message.new") {
-          return;
-        }
-        const incoming = data.payload as DirectMessage;
-        setConversations((prev) => {
-          const existing = prev.find((item) => item.id === incoming.conversation_id);
-          const counterpart = incoming.sender.id === user?.id ? incoming.recipient : incoming.sender;
-          const nextSummary: ConversationSummary = {
-            id: incoming.conversation_id,
-            counterpart,
-            last_message_preview: incoming.content,
-            last_message_at: incoming.created_at,
-            unread_count: incoming.sender.id === user?.id ? 0 : existing ? existing.unread_count + 1 : 1,
-          };
-          if (!existing) {
-            return [nextSummary, ...prev];
-          }
-          return [nextSummary, ...prev.filter((item) => item.id !== incoming.conversation_id)];
-        });
-        setActiveConversation((prev) => {
-          if (!prev || prev.conversation.id !== incoming.conversation_id) {
-            return prev;
-          }
-          if (prev.messages.some((item) => item.id === incoming.id)) {
-            return prev;
-          }
-          return {
-            conversation: {
-              ...prev.conversation,
-              last_message_preview: incoming.content,
-              last_message_at: incoming.created_at,
-              unread_count: 0,
-            },
-            messages: [...prev.messages, incoming],
-          };
-        });
-      } catch {
-        // Ignore malformed websocket payloads and keep the inbox usable.
-      }
-    };
-    return () => {
-      socket.close();
-    };
-  }, [token, user?.id]);
-
-  useEffect(() => {
-    const conversationParam = searchParams.get("conversation");
-    const lawyerParam = searchParams.get("lawyer");
-    if (!conversationParam && !lawyerParam) {
+    if (!requestedLawyerHandle && !selectedConversationId) {
+      setActiveConversationId(null);
       return;
     }
 
     let active = true;
 
-    async function openRequestedConversation() {
+    async function loadRequestedConversation() {
       try {
         setLoadingConversation(true);
-        const detail = lawyerParam
-          ? await startConversationWithLawyer(lawyerParam)
-          : await getConversation(Number(conversationParam));
+        const detail = requestedLawyerHandle
+          ? await startConversationWithLawyerHandle(requestedLawyerHandle)
+          : await openConversation(selectedConversationId as number);
         if (!active) {
           return;
         }
-        setActiveConversation(detail);
-        setConversations((prev) => {
-          const withoutCurrent = prev.filter((item) => item.id !== detail.conversation.id);
-          return [detail.conversation, ...withoutCurrent];
-        });
         setSearchParams((params) => {
           params.set("conversation", String(detail.conversation.id));
           params.delete("lawyer");
@@ -191,24 +108,37 @@ export default function MessagesPage() {
       }
     }
 
-    void openRequestedConversation();
+    void loadRequestedConversation();
     return () => {
       active = false;
     };
-  }, [searchParams, setSearchParams, toast]);
+  }, [
+    openConversation,
+    requestedLawyerHandle,
+    selectedConversationId,
+    setActiveConversationId,
+    setSearchParams,
+    startConversationWithLawyerHandle,
+    toast,
+  ]);
 
-  const activeCounterpart = useMemo(
-    () => activeConversation?.conversation.counterpart ?? null,
-    [activeConversation],
+  const activeConversation = useMemo(
+    () => conversations.find((conversation) => conversation.id === selectedConversationId) ?? null,
+    [conversations, selectedConversationId],
   );
 
-  async function openConversation(conversationId: number) {
+  const activeMessages = useMemo(
+    () => (selectedConversationId ? messagesByConversation[selectedConversationId] ?? [] : []),
+    [messagesByConversation, selectedConversationId],
+  );
+
+  async function handleOpenConversation(conversationId: number) {
     try {
       setLoadingConversation(true);
-      const detail = await getConversation(conversationId);
-      setActiveConversation(detail);
+      const detail = await openConversation(conversationId);
       setSearchParams((params) => {
-        params.set("conversation", String(conversationId));
+        params.set("conversation", String(detail.conversation.id));
+        params.delete("lawyer");
         return params;
       });
     } catch (err: any) {
@@ -222,17 +152,13 @@ export default function MessagesPage() {
     }
   }
 
-  async function startConversationWithParticipant(participantId: string) {
+  async function handleStartConversation(participantId: string) {
     try {
       setLoadingConversation(true);
-      const detail = await startConversation(participantId);
-      setActiveConversation(detail);
-      setConversations((prev) => {
-        const withoutCurrent = prev.filter((item) => item.id !== detail.conversation.id);
-        return [detail.conversation, ...withoutCurrent];
-      });
+      const detail = await startConversationWithParticipant(participantId);
       setSearchParams((params) => {
         params.set("conversation", String(detail.conversation.id));
+        params.delete("lawyer");
         return params;
       });
     } catch (err: any) {
@@ -247,35 +173,12 @@ export default function MessagesPage() {
   }
 
   async function handleSend() {
-    if (!activeConversation || !message.trim() || sending) {
+    if (!selectedConversationId || !message.trim() || sending) {
       return;
     }
     try {
       setSending(true);
-      const sent = await sendConversationMessage(activeConversation.conversation.id, message.trim());
-      setActiveConversation((prev) =>
-        prev
-          ? {
-              conversation: {
-                ...prev.conversation,
-                last_message_preview: sent.content,
-                last_message_at: sent.created_at,
-                unread_count: 0,
-              },
-              messages: [...prev.messages, sent],
-            }
-          : prev,
-      );
-      setConversations((prev) => [
-        {
-          id: sent.conversation_id,
-          counterpart: sent.recipient.id === user?.id ? sent.sender : sent.recipient,
-          last_message_preview: sent.content,
-          last_message_at: sent.created_at,
-          unread_count: 0,
-        },
-        ...prev.filter((item) => item.id !== sent.conversation_id),
-      ]);
+      await sendMessage(selectedConversationId, message.trim());
       setMessage("");
     } catch (err: any) {
       toast({
@@ -297,6 +200,9 @@ export default function MessagesPage() {
               <div>
                 <p className="text-xs uppercase tracking-[0.28em] text-slate-500">Start a chat</p>
                 <h1 className="mt-2 font-display text-3xl font-bold text-slate-950">Realtime legal messaging</h1>
+                <p className="mt-2 text-sm text-slate-500">
+                  Conversations are cached per account, so your inbox reappears quickly after you sign back in.
+                </p>
               </div>
               <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
                 <Search className="h-4 w-4 text-slate-400" />
@@ -312,7 +218,7 @@ export default function MessagesPage() {
                   <button
                     key={participant.id}
                     type="button"
-                    onClick={() => void startConversationWithParticipant(participant.id)}
+                    onClick={() => void handleStartConversation(participant.id)}
                     className="flex w-full items-start justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-left transition hover:border-slate-300 hover:bg-white"
                   >
                     <div>
@@ -331,25 +237,41 @@ export default function MessagesPage() {
 
           <Card className="rounded-[28px] border-slate-200 bg-white shadow-lg shadow-slate-200/40">
             <CardContent className="space-y-4 p-6">
-              <p className="text-xs uppercase tracking-[0.28em] text-slate-500">Conversations</p>
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-xs uppercase tracking-[0.28em] text-slate-500">Conversations</p>
+                {isBootstrapping ? <span className="text-xs text-slate-400">Syncing...</span> : null}
+              </div>
               <div className="space-y-3">
                 {conversations.map((conversation) => (
                   <button
                     key={conversation.id}
                     type="button"
-                    onClick={() => void openConversation(conversation.id)}
+                    onClick={() => void handleOpenConversation(conversation.id)}
                     className={`w-full rounded-2xl border px-4 py-4 text-left transition ${
-                      activeConversation?.conversation.id === conversation.id
+                      selectedConversationId === conversation.id
                         ? "border-slate-950 bg-slate-950 text-white"
                         : "border-slate-200 bg-slate-50 hover:border-slate-300 hover:bg-white"
                     }`}
                   >
-                    <p className={`font-semibold ${activeConversation?.conversation.id === conversation.id ? "text-white" : "text-slate-950"}`}>
-                      {conversation.counterpart.full_name}
-                    </p>
-                    <p className={`mt-1 text-sm ${activeConversation?.conversation.id === conversation.id ? "text-slate-300" : "text-slate-500"}`}>
-                      {conversation.last_message_preview || "Conversation started"}
-                    </p>
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className={`font-semibold ${selectedConversationId === conversation.id ? "text-white" : "text-slate-950"}`}>
+                          {conversation.counterpart.full_name}
+                        </p>
+                        <p className={`mt-1 text-sm ${selectedConversationId === conversation.id ? "text-slate-300" : "text-slate-500"}`}>
+                          {conversation.last_message_preview || "Conversation started"}
+                        </p>
+                      </div>
+                      {conversation.unread_count > 0 ? (
+                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                          selectedConversationId === conversation.id
+                            ? "bg-white/15 text-white"
+                            : "bg-rose-500 text-white"
+                        }`}>
+                          {conversation.unread_count}
+                        </span>
+                      ) : null}
+                    </div>
                   </button>
                 ))}
               </div>
@@ -360,10 +282,10 @@ export default function MessagesPage() {
         <Card className="rounded-[30px] border-slate-200 bg-white shadow-xl shadow-slate-200/40">
           <CardContent className="flex h-[78vh] flex-col p-0">
             <div className="border-b border-slate-200 px-6 py-5">
-              {activeCounterpart ? (
+              {activeConversation ? (
                 <>
-                  <p className="font-display text-3xl font-bold text-slate-950">{activeCounterpart.full_name}</p>
-                  <p className="mt-1 text-sm text-slate-500">{formatRole(activeCounterpart.role)}</p>
+                  <p className="font-display text-3xl font-bold text-slate-950">{activeConversation.counterpart.full_name}</p>
+                  <p className="mt-1 text-sm text-slate-500">{formatRole(activeConversation.counterpart.role)}</p>
                 </>
               ) : (
                 <>
@@ -377,7 +299,7 @@ export default function MessagesPage() {
               {loadingConversation ? (
                 <p className="text-sm text-slate-500">Loading conversation...</p>
               ) : activeConversation ? (
-                activeConversation.messages.length > 0 ? activeConversation.messages.map((item) => (
+                activeMessages.length > 0 ? activeMessages.map((item) => (
                   <div
                     key={item.id}
                     className={`max-w-[78%] rounded-[24px] px-4 py-3 text-sm leading-7 ${
@@ -405,7 +327,7 @@ export default function MessagesPage() {
                 <Textarea
                   value={message}
                   onChange={(event) => setMessage(event.target.value)}
-                  placeholder="Write a message..."
+                  placeholder={`Write a message as ${user?.full_name || "your account"}...`}
                   className="min-h-[56px] resize-none"
                   onKeyDown={(event) => {
                     if (event.key === "Enter" && !event.shiftKey) {
@@ -417,7 +339,7 @@ export default function MessagesPage() {
                 <Button
                   type="button"
                   onClick={() => void handleSend()}
-                  disabled={!activeConversation || !message.trim() || sending}
+                  disabled={!selectedConversationId || !message.trim() || sending}
                   className="shrink-0 rounded-2xl bg-slate-950 px-5 text-amber-50 hover:bg-slate-900"
                 >
                   <Send className="h-4 w-4" />
