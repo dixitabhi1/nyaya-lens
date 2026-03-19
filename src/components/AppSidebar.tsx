@@ -14,9 +14,11 @@ import {
   Microscope,
   Landmark,
   Scale,
+  Shield,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useInbox } from "@/lib/inbox-context";
+import { useAuth } from "@/lib/auth-context";
 import {
   Sidebar,
   SidebarContent,
@@ -29,7 +31,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
-const platformModules = [
+const basePlatformModules = [
   { title: "Home", url: "/dashboard", icon: LayoutDashboard },
   { title: "AI Legal Assistant", url: "/chat", icon: MessageSquare },
   { title: "File Complaint", url: "/fir", icon: FileWarning },
@@ -43,17 +45,28 @@ const platformModules = [
   { title: "Track Case", url: "/strength", icon: TrendingUp },
 ];
 
-const operationsModules = [
+const baseOperationsModules = [
   { title: "Document Drafting", url: "/drafting", icon: PenTool },
   { title: "Evidence Analyzer", url: "/evidence", icon: Microscope },
-  { title: "Lawyer Dashboard", url: "/lawyer-dashboard", icon: MessageSquare },
-  { title: "Police Dashboard", url: "/police-dashboard", icon: Landmark },
 ];
 
 export function AppSidebar() {
   const { state } = useSidebar();
   const { unreadCount } = useInbox();
+  const { user } = useAuth();
   const collapsed = state === "collapsed";
+  const platformModules = basePlatformModules.filter((item) => {
+    if (item.url === "/messages") {
+      return Boolean(user);
+    }
+    return true;
+  });
+  const operationsModules = [
+    ...baseOperationsModules,
+    ...(user?.can_access_lawyer_dashboard ? [{ title: "Lawyer Dashboard", url: "/lawyer-dashboard", icon: MessageSquare }] : []),
+    ...(user?.can_access_police_dashboard ? [{ title: "Police Dashboard", url: "/police-dashboard", icon: Landmark }] : []),
+    ...(user?.can_access_admin_dashboard ? [{ title: "Admin Panel", url: "/admin", icon: Shield }] : []),
+  ];
 
   return (
     <Sidebar collapsible="icon">
@@ -85,7 +98,16 @@ export function AppSidebar() {
                       activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-semibold"
                     >
                       <item.icon className="mr-2 h-4 w-4 shrink-0" />
-                      {!collapsed && <span className="text-sm">{item.title}</span>}
+                      {!collapsed && (
+                        <span className="flex items-center gap-2 text-sm">
+                          <span>{item.title}</span>
+                          {item.url === "/messages" && unreadCount > 0 ? (
+                            <span className="rounded-full bg-rose-500 px-2 py-0.5 text-[10px] font-semibold text-white">
+                              {unreadCount > 9 ? "9+" : unreadCount}
+                            </span>
+                          ) : null}
+                        </span>
+                      )}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -107,16 +129,7 @@ export function AppSidebar() {
                       activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-semibold"
                     >
                       <item.icon className="mr-2 h-4 w-4 shrink-0" />
-                      {!collapsed && (
-                        <span className="flex items-center gap-2 text-sm">
-                          <span>{item.title}</span>
-                          {item.url === "/messages" && unreadCount > 0 ? (
-                            <span className="rounded-full bg-rose-500 px-2 py-0.5 text-[10px] font-semibold text-white">
-                              {unreadCount > 9 ? "9+" : unreadCount}
-                            </span>
-                          ) : null}
-                        </span>
-                      )}
+                      {!collapsed && <span className="text-sm">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

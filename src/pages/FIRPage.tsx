@@ -11,6 +11,7 @@ import { EmptyState } from "@/components/shared/EmptyState";
 import { NoticeBanner } from "@/components/shared/NoticeBanner";
 import { StatusPill } from "@/components/shared/StatusPill";
 import { Download, Eye, Send, Save, Clock, FileText, ChevronRight, RotateCcw, X } from "lucide-react";
+import { useAuth } from "@/lib/auth-context";
 import {
   firManualPreview,
   firManualSubmit,
@@ -27,6 +28,8 @@ import FIRResult from "@/components/fir/FIRResult";
 
 const STORAGE_KEY = "nyayasetu_fir_manual_form";
 const STORAGE_TAB_KEY = "nyayasetu_fir_active_tab";
+type DraftRole = "citizen_application" | "police_fir" | "lawyer_analysis";
+type DraftLanguage = "en" | "hi";
 
 const defaultForm = {
   complainant_name: "",
@@ -43,7 +46,25 @@ const defaultForm = {
   evidence_information: "",
 };
 
-function ManualTab() {
+const draftRoleMeta: Record<DraftRole, { title: string; description: string; access: "public" | "police" | "lawyer" }> = {
+  citizen_application: {
+    title: "Citizen Application",
+    description: "Draft a complaint application for submission to a police station or police officer.",
+    access: "public",
+  },
+  police_fir: {
+    title: "Police FIR Draft",
+    description: "Transform the complaint application into a structured FIR draft for police review.",
+    access: "police",
+  },
+  lawyer_analysis: {
+    title: "Lawyer FIR Analysis",
+    description: "Generate a lawyer-focused review note with comparative sections and review checks.",
+    access: "lawyer",
+  },
+};
+
+function ManualTab({ draftRole, language }: { draftRole: DraftRole; language: DraftLanguage }) {
   const [form, setForm] = useState(defaultForm);
   const [loading, setLoading] = useState(false);
   const [preview, setPreview] = useState<any>(null);
@@ -87,6 +108,8 @@ function ManualTab() {
     accused_details: form.accused_details.split(",").map((s) => s.trim()).filter(Boolean),
     witness_details: form.witness_details.split(",").map((s) => s.trim()).filter(Boolean),
     evidence_information: form.evidence_information.split(",").map((s) => s.trim()).filter(Boolean),
+    draft_role: draftRole,
+    language,
   });
 
   const handlePreview = async () => {
@@ -151,7 +174,7 @@ function ManualTab() {
   );
 }
 
-function UploadTab() {
+function UploadTab({ draftRole, language }: { draftRole: DraftRole; language: DraftLanguage }) {
   const [file, setFile] = useState<File | null>(null);
   const [policeStation, setPoliceStation] = useState("");
   const [loading, setLoading] = useState(false);
@@ -163,6 +186,8 @@ function UploadTab() {
     const fd = new FormData();
     if (file) fd.append("complaint_file", file);
     if (policeStation.trim()) fd.append("police_station", policeStation.trim());
+    fd.append("draft_role", draftRole);
+    fd.append("language", language);
     return fd;
   };
 
@@ -199,7 +224,7 @@ function UploadTab() {
   );
 }
 
-function VoiceTab() {
+function VoiceTab({ draftRole, language }: { draftRole: DraftRole; language: DraftLanguage }) {
   const [file, setFile] = useState<File | null>(null);
   const [transcriptText, setTranscriptText] = useState("");
   const [policeStation, setPoliceStation] = useState("");
@@ -215,6 +240,8 @@ function VoiceTab() {
     if (transcriptText.trim()) fd.append("transcript_text", transcriptText.trim());
     if (policeStation.trim()) fd.append("police_station", policeStation.trim());
     if (complainantName.trim()) fd.append("complainant_name", complainantName.trim());
+    fd.append("draft_role", draftRole);
+    fd.append("language", language);
     return fd;
   };
 
@@ -344,7 +371,12 @@ function FIREditor({ firId, onClose }: { firId: string; onClose: () => void }) {
   const handleSave = async () => {
     setSaving(true); setError(""); setSaveSuccess(false);
     try {
-      await firUpdateDraft(firId, { draft_text: draft });
+      await firUpdateDraft(firId, {
+        draft_text: draft,
+        document_kind: fir?.draft_role || "citizen_application",
+        language: fir?.draft_language || "en",
+        edit_summary: "Updated from NyayaSetu FIR editor",
+      });
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
       // Reload to get updated version
@@ -410,10 +442,25 @@ function FIREditor({ firId, onClose }: { firId: string; onClose: () => void }) {
 }
 
 export default function FIRPage() {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState(() => {
     return localStorage.getItem(STORAGE_TAB_KEY) || "manual";
   });
   const [editingFirId, setEditingFirId] = useState<string | null>(null);
+  const [draftRole, setDraftRole] = useState<DraftRole>("citizen_application");
+  const [language, setLanguage] = useState<DraftLanguage>("en");
+
+  const canAccessPolice = Boolean(user?.can_access_police_dashboard);
+  const canAccessLawyer = Boolean(user?.can_access_lawyer_dashboard);
+
+  useEffect(() => {
+    if (draftRole === "police_fir" && !canAccessPolice) {
+      setDraftRole("citizen_application");
+    }
+    if (draftRole === "lawyer_analysis" && !canAccessLawyer) {
+      setDraftRole("citizen_application");
+    }
+  }, [draftRole, canAccessPolice, canAccessLawyer]);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_TAB_KEY, activeTab);
@@ -431,6 +478,70 @@ export default function FIRPage() {
   return (
     <div className="max-w-4xl mx-auto p-6">
       <PageHeader title="FIR Generator" description="Generate First Information Reports through manual entry, complaint upload, or voice recording." />
+      <div className="space-y-4 mb-6">
+        <div className="rounded-2xl border bg-card p-4">
+          <div className="flex flex-col gap-4">
+            <div>
+              <p className="text-sm font-semibold text-foreground">Choose document track</p>
+              <p className="text-sm text-muted-foreground">
+                Citizens can draft complaint applications immediately. Police and lawyer tracks unlock after approval.
+              </p>
+            </div>
+            <div className="grid gap-3 md:grid-cols-3">
+              {(Object.keys(draftRoleMeta) as DraftRole[]).map((value) => {
+                const meta = draftRoleMeta[value];
+                const locked =
+                  (meta.access === "police" && !canAccessPolice) ||
+                  (meta.access === "lawyer" && !canAccessLawyer);
+                return (
+                  <button
+                    key={value}
+                    type="button"
+                    disabled={locked}
+                    onClick={() => setDraftRole(value)}
+                    className={`rounded-2xl border p-4 text-left transition ${
+                      draftRole === value
+                        ? "border-slate-950 bg-slate-950 text-amber-50"
+                        : "border-border bg-background hover:border-slate-400 hover:bg-slate-50"
+                    } ${locked ? "cursor-not-allowed opacity-60" : ""}`}
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="font-semibold">{meta.title}</span>
+                      {locked && <StatusPill label="Approval required" variant="warning" />}
+                    </div>
+                    <p className={`mt-2 text-sm leading-6 ${draftRole === value ? "text-amber-100" : "text-muted-foreground"}`}>
+                      {meta.description}
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
+            <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_180px]">
+              <div>
+                <p className="text-sm font-medium text-foreground">Active lane</p>
+                <p className="text-sm text-muted-foreground">{draftRoleMeta[draftRole].description}</p>
+              </div>
+              <label className="space-y-2">
+                <span className="text-sm font-medium text-foreground">Language</span>
+                <select
+                  value={language}
+                  onChange={(event) => setLanguage(event.target.value as DraftLanguage)}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                >
+                  <option value="en">English</option>
+                  <option value="hi">Hindi</option>
+                </select>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        {!canAccessPolice || !canAccessLawyer ? (
+          <NoticeBanner variant="info">
+            Professional FIR lanes stay locked until the requested lawyer or police role is approved. Citizen complaint drafting remains available immediately.
+          </NoticeBanner>
+        ) : null}
+      </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="mb-6">
@@ -439,9 +550,9 @@ export default function FIRPage() {
           <TabsTrigger value="voice">Voice Filing</TabsTrigger>
           <TabsTrigger value="saved">Saved FIRs</TabsTrigger>
         </TabsList>
-        <TabsContent value="manual"><ManualTab /></TabsContent>
-        <TabsContent value="upload"><UploadTab /></TabsContent>
-        <TabsContent value="voice"><VoiceTab /></TabsContent>
+        <TabsContent value="manual"><ManualTab draftRole={draftRole} language={language} /></TabsContent>
+        <TabsContent value="upload"><UploadTab draftRole={draftRole} language={language} /></TabsContent>
+        <TabsContent value="voice"><VoiceTab draftRole={draftRole} language={language} /></TabsContent>
         <TabsContent value="saved"><SavedFIRs onOpen={(id) => setEditingFirId(id)} /></TabsContent>
       </Tabs>
     </div>

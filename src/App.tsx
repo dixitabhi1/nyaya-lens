@@ -30,6 +30,7 @@ const LawyerProfilePage = lazy(() => import("./pages/LawyerProfilePage"));
 const LawyerDashboardPage = lazy(() => import("./pages/LawyerDashboardPage"));
 const PoliceDashboardPage = lazy(() => import("./pages/PoliceDashboardPage"));
 const MessagesPage = lazy(() => import("./pages/MessagesPage"));
+const AdminDashboardPage = lazy(() => import("./pages/AdminDashboardPage"));
 
 const queryClient = new QueryClient();
 
@@ -58,9 +59,19 @@ const App = () => (
                 <Route path="/lawyers" element={<AppLayout><LawyersPage /></AppLayout>} />
                 <Route path="/lawyers/join" element={<AppLayout><LawyerRegisterPage /></AppLayout>} />
                 <Route path="/lawyer/:handle" element={<AppLayout><LawyerProfilePage /></AppLayout>} />
-                <Route path="/lawyer-dashboard" element={<ProtectedRoute><AppLayout><LawyerDashboardPage /></AppLayout></ProtectedRoute>} />
+                <Route
+                  path="/lawyer-dashboard"
+                  element={<ProtectedRoute requiredAccess="lawyer"><AppLayout><LawyerDashboardPage /></AppLayout></ProtectedRoute>}
+                />
                 <Route path="/lawyer-network" element={<AppLayout><LawyerNetworkPage /></AppLayout>} />
-                <Route path="/police-dashboard" element={<AppLayout><PoliceDashboardPage /></AppLayout>} />
+                <Route
+                  path="/police-dashboard"
+                  element={<ProtectedRoute requiredAccess="police"><AppLayout><PoliceDashboardPage /></AppLayout></ProtectedRoute>}
+                />
+                <Route
+                  path="/admin"
+                  element={<ProtectedRoute requiredAccess="admin"><AppLayout><AdminDashboardPage /></AppLayout></ProtectedRoute>}
+                />
                 <Route path="/messages" element={<ProtectedRoute><AppLayout><MessagesPage /></AppLayout></ProtectedRoute>} />
                 <Route path="/chat" element={<ProtectedRoute><AppLayout><ChatPage /></AppLayout></ProtectedRoute>} />
                 <Route path="/case-analysis" element={<ProtectedRoute><AppLayout><CaseAnalysisPage /></AppLayout></ProtectedRoute>} />

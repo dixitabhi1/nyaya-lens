@@ -21,7 +21,16 @@ type AuthContextValue = {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (payload: { email: string; full_name: string; password: string; role?: string }) => Promise<void>;
+  register: (payload: {
+    email: string;
+    full_name: string;
+    password: string;
+    role?: string;
+    professional_id?: string | null;
+    organization?: string | null;
+    city?: string | null;
+    preferred_language?: string;
+  }) => Promise<void>;
   logout: () => Promise<void>;
 };
 
@@ -74,6 +83,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     full_name: string;
     password: string;
     role?: string;
+    professional_id?: string | null;
+    organization?: string | null;
+    city?: string | null;
+    preferred_language?: string;
   }) {
     const response = await authRegister(payload);
     persistAuthSession(response.access_token, response.user);

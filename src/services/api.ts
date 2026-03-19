@@ -268,6 +268,72 @@ export type LawyerDashboardResponse = {
   generated_at: string;
 };
 
+export type PendingRoleApplicationLinkedProfile = {
+  handle: string;
+  verification_status: string;
+  specialization: string;
+  bar_council_id: string;
+  city: string;
+};
+
+export type PendingRoleApplication = {
+  id: string;
+  email: string;
+  full_name: string;
+  role: string;
+  requested_role: string;
+  approval_status: string;
+  professional_id?: string | null;
+  organization?: string | null;
+  city?: string | null;
+  preferred_language: string;
+  approval_notes?: string | null;
+  last_login_at?: string | null;
+  linked_profile?: PendingRoleApplicationLinkedProfile | null;
+  created_at: string;
+};
+
+export type PendingRoleApplicationsResponse = {
+  applications: PendingRoleApplication[];
+};
+
+export type AdminMetric = {
+  title: string;
+  value: string;
+  detail: string;
+};
+
+export type AdminLawyerProfileReview = {
+  handle: string;
+  name: string;
+  verification_status: string;
+  specialization: string;
+  city: string;
+  bar_council_id: string;
+  linked_user_email?: string | null;
+  created_at: string;
+};
+
+export type AdminFIRQueueItem = {
+  fir_id: string;
+  workflow: string;
+  draft_role: string;
+  status: string;
+  complainant_name?: string | null;
+  police_station?: string | null;
+  incident_date?: string | null;
+  incident_location?: string | null;
+  last_edited_at: string;
+};
+
+export type AdminDashboardResponse = {
+  metrics: AdminMetric[];
+  pending_applications: PendingRoleApplication[];
+  recent_lawyer_profiles: AdminLawyerProfileReview[];
+  recent_firs: AdminFIRQueueItem[];
+  generated_at: string;
+};
+
 export type MessageParticipant = {
   id: string;
   full_name: string;
@@ -315,6 +381,10 @@ export const authRegister = (data: {
   full_name: string;
   password: string;
   role?: string;
+  professional_id?: string | null;
+  organization?: string | null;
+  city?: string | null;
+  preferred_language?: string;
 }) => post<any>("/auth/register", data);
 
 export const authLogin = (data: { email: string; password: string }) =>
@@ -325,6 +395,10 @@ export const authMe = () => get<any>("/auth/me");
 export const authLogout = () => post<any>("/auth/logout", {});
 export const getHistory = (category?: string, limit = 20) =>
   get<any>(`/history?limit=${limit}${category ? `&category=${encodeURIComponent(category)}` : ""}`);
+export const getPendingRoleApprovals = () =>
+  get<PendingRoleApplicationsResponse>("/auth/approvals");
+export const updateRoleApproval = (userId: string, approval_status: "approved" | "rejected" | "pending", notes?: string) =>
+  post<any>(`/auth/approvals/${encodeURIComponent(userId)}`, { approval_status, notes });
 
 // Chat
 export const chatQuery = (
@@ -366,6 +440,21 @@ export const firVersions = (firId: string) => get<any>(`/fir/${firId}/versions`)
 export const firIntelligence = (firId: string) => get<any>(`/fir/${firId}/intelligence`);
 export const firAnalyticsPatterns = (days = 7) => get<any>(`/fir/analytics/patterns?window_days=${days}`);
 export const firList = (limit = 25) => get<any>(`/fir?limit=${limit}`);
+export async function downloadFirDocumentPdf(firId: string, documentKind: string, language?: string): Promise<Blob> {
+  const token = getAuthToken();
+  const suffix = language ? `?language=${encodeURIComponent(language)}` : "";
+  const response = await fetch(
+    `${BASE_URL}/fir/${encodeURIComponent(firId)}/documents/${encodeURIComponent(documentKind)}.pdf${suffix}`,
+    {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    },
+  );
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`API Error ${response.status}: ${text}`);
+  }
+  return response.blob();
+}
 
 // Case Strength
 export const predictStrength = (data: any) => post<any>("/analysis/strength", data);
@@ -415,6 +504,9 @@ export const createLawyerNetworkPost = (data: LawyerPostCreatePayload) =>
 
 export const getLawyerDashboard = () =>
   get<LawyerDashboardResponse>("/lawyers/dashboard/me");
+
+export const getAdminDashboard = (limit = 12) =>
+  get<AdminDashboardResponse>(`/admin/dashboard?limit=${limit}`);
 
 export const listMessageUsers = (query?: string, limit = 20) =>
   get<MessageUserDirectoryResponse>(

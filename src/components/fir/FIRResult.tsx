@@ -1,17 +1,28 @@
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ResultCard } from "@/components/shared/ResultCard";
 import { StatusPill } from "@/components/shared/StatusPill";
 import { Download } from "lucide-react";
+import { downloadFirDocumentPdf } from "@/services/api";
 
 export default function FIRResult({ data }: { data: any }) {
   if (!data) return null;
 
   const extracted = data.extracted_data || data.complainant || null;
   const sections = data.sections || data.bns_sections || data.bns_prediction || [];
-  const draftText = data.draft_text || data.draft || data.fir_draft || "";
+  const generatedDocuments = Array.isArray(data.generated_documents) ? data.generated_documents : [];
+  const initialDocumentKind = data.draft_role || generatedDocuments[0]?.kind || "citizen_application";
+  const [activeKind, setActiveKind] = useState<string>(initialDocumentKind);
+  const [downloadingPdf, setDownloadingPdf] = useState(false);
+  const activeDocument = useMemo(
+    () => generatedDocuments.find((document: any) => document.kind === activeKind) || generatedDocuments[0] || null,
+    [generatedDocuments, activeKind],
+  );
+  const draftText = activeDocument?.content || data.draft_text || data.draft || data.fir_draft || "";
   const completenessScore = data.completeness?.completeness_score ?? data.completeness_score;
   const missingFields = data.completeness?.missing_fields || [];
   const caseStrengthScore = data.case_strength_score;
+  const comparativeSections = data.comparative_sections || null;
 
   const handleDownload = () => {
     const text = draftText || JSON.stringify(data, null, 2);
@@ -19,10 +30,33 @@ export default function FIRResult({ data }: { data: any }) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `FIR-${data.fir_id || "draft"}.txt`;
+    a.download = `FIR-${data.fir_id || "draft"}-${activeDocument?.kind || "draft"}.txt`;
     a.click();
     URL.revokeObjectURL(url);
   };
+
+  const handleDownloadPdf = async () => {
+    if (!data.fir_id || !activeDocument) return;
+    try {
+      setDownloadingPdf(true);
+      const blob = await downloadFirDocumentPdf(data.fir_id, activeDocument.kind, activeDocument.language);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `FIR-${data.fir_id}-${activeDocument.kind}-${activeDocument.language}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } finally {
+      setDownloadingPdf(false);
+    }
+  };
+
+  const comparativeBadges = [
+    ...(comparativeSections?.bns || []),
+    ...(comparativeSections?.bnss || []),
+    ...(comparativeSections?.ipc || []),
+    ...(comparativeSections?.crpc || []),
+  ];
 
   return (
     <div className="space-y-4 animate-fade-in">
@@ -56,6 +90,20 @@ export default function FIRResult({ data }: { data: any }) {
               <StatusPill key={i} label={typeof s === "string" ? s : s.section || s.title || s.name} variant="default" />
             ))}</div>
           ) : <p className="text-sm">{String(sections)}</p>}
+        </ResultCard>
+      )}
+
+      {comparativeBadges.length > 0 && (
+        <ResultCard title="Comparative Sections">
+          <div className="flex flex-wrap gap-2">
+            {comparativeBadges.map((section: any, index: number) => (
+              <StatusPill
+                key={`${section.section || section.title || index}-${index}`}
+                label={`${section.section || "Section"}${section.title ? ` - ${section.title}` : ""}`}
+                variant="default"
+              />
+            ))}
+          </div>
         </ResultCard>
       )}
 
@@ -104,10 +152,38 @@ export default function FIRResult({ data }: { data: any }) {
       )}
 
       {draftText && (
-        <ResultCard title="FIR Draft">
+        <ResultCard title="Generated Documents">
+          {generatedDocuments.length > 0 ? (
+            <div className="mb-4 flex flex-wrap gap-2">
+              {generatedDocuments.map((document: any) => (
+                <button
+                  key={`${document.kind}-${document.language}`}
+                  type="button"
+                  onClick={() => setActiveKind(document.kind)}
+                  className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+                    activeKind === document.kind
+                      ? "border-slate-950 bg-slate-950 text-amber-50"
+                      : "border-border bg-background text-foreground hover:border-slate-400 hover:bg-slate-50"
+                  }`}
+                >
+                  {document.title}
+                  {document.language ? ` • ${document.language.toUpperCase()}` : ""}
+                </button>
+              ))}
+            </div>
+          ) : null}
           <pre className="text-sm whitespace-pre-wrap font-body leading-relaxed">{draftText}</pre>
           <div className="mt-4 pt-4 border-t">
-            <Button variant="outline" size="sm" onClick={handleDownload}><Download className="h-4 w-4 mr-2" /> Download</Button>
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" size="sm" onClick={handleDownload}>
+                <Download className="h-4 w-4 mr-2" /> Download Text
+              </Button>
+              {data.fir_id && activeDocument ? (
+                <Button variant="outline" size="sm" onClick={() => void handleDownloadPdf()} disabled={downloadingPdf}>
+                  <Download className="h-4 w-4 mr-2" /> {downloadingPdf ? "Preparing PDF..." : "Download PDF"}
+                </Button>
+              ) : null}
+            </div>
           </div>
         </ResultCard>
       )}

@@ -6,6 +6,16 @@ export type AuthUser = {
   email: string;
   full_name: string;
   role: string;
+  requested_role: string;
+  approval_status: string;
+  professional_id?: string | null;
+  organization?: string | null;
+  city?: string | null;
+  preferred_language?: string;
+  approval_notes?: string | null;
+  can_access_lawyer_dashboard?: boolean;
+  can_access_police_dashboard?: boolean;
+  can_access_admin_dashboard?: boolean;
   is_active: boolean;
   created_at: string;
   last_login_at?: string | null;

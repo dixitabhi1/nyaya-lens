@@ -27,7 +27,11 @@ export function AppLayout({ children }: { children: ReactNode }) {
               {user ? (
                 <div className="hidden md:block text-right">
                   <p className="text-sm font-medium text-foreground">{user.full_name}</p>
-                  <p className="text-xs text-muted-foreground">{user.role}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {user.role}
+                    {user.requested_role && user.requested_role !== user.role ? ` -> ${user.requested_role}` : ""}
+                    {user.approval_status ? ` | ${user.approval_status}` : ""}
+                  </p>
                 </div>
               ) : (
                 <div className="hidden md:block text-right">
