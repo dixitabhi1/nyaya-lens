@@ -10,7 +10,7 @@ import { LoadingState } from "@/components/shared/LoadingState";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { NoticeBanner } from "@/components/shared/NoticeBanner";
 import { StatusPill } from "@/components/shared/StatusPill";
-import { Download, Eye, Send, Save, Clock, FileText, ChevronRight, RotateCcw, X } from "lucide-react";
+import { Download, Eye, Send, Save, Clock, FileText, ChevronRight, RotateCcw, X, Mic } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import {
   firManualPreview,
@@ -25,6 +25,7 @@ import {
   firList,
 } from "@/services/api";
 import FIRResult from "@/components/fir/FIRResult";
+import { VoiceTranscriptionDialog } from "@/components/fir/VoiceTranscriptionDialog";
 
 const STORAGE_KEY = "nyayasetu_fir_manual_form";
 const STORAGE_TAB_KEY = "nyayasetu_fir_active_tab";
@@ -229,6 +230,8 @@ function VoiceTab({ draftRole, language }: { draftRole: DraftRole; language: Dra
   const [transcriptText, setTranscriptText] = useState("");
   const [policeStation, setPoliceStation] = useState("");
   const [complainantName, setComplainantName] = useState("");
+  const [recorderOpen, setRecorderOpen] = useState(false);
+  const [voiceNoteDuration, setVoiceNoteDuration] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [preview, setPreview] = useState<any>(null);
   const [submitted, setSubmitted] = useState<any>(null);
@@ -263,10 +266,56 @@ function VoiceTab({ draftRole, language }: { draftRole: DraftRole; language: Dra
     } catch (e: any) { setError(e.message); } finally { setLoading(false); }
   };
 
+  const handleRecorderApply = ({ file: recordedFile, transcriptText: nextTranscript, durationSeconds }: {
+    file: File | null;
+    transcriptText: string;
+    durationSeconds: number;
+  }) => {
+    if (recordedFile) {
+      setFile(recordedFile);
+      setVoiceNoteDuration(durationSeconds);
+    }
+    if (nextTranscript.trim()) {
+      setTranscriptText(nextTranscript.trim());
+    }
+    setError("");
+  };
+
   return (
     <div className="space-y-4">
-      <FileUpload onFile={setFile} accept="audio/*" label="Upload voice recording" />
-      <Textarea placeholder="Or paste transcript text" value={transcriptText} onChange={(e) => setTranscriptText(e.target.value)} rows={4} />
+      <NoticeBanner variant="info">
+        Voice FIR works best when you record through the NyayaSetu mic popup, review the transcript, and then preview the FIR draft before submitting it.
+      </NoticeBanner>
+      <FileUpload file={file} onFile={setFile} accept="audio/*" label="Upload voice recording" />
+      <div className="flex flex-wrap gap-2">
+        <Button type="button" variant="outline" onClick={() => setRecorderOpen(true)}>
+          <Mic className="h-4 w-4 mr-2" /> Record voice note
+        </Button>
+        {file ? (
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => {
+              setFile(null);
+              setVoiceNoteDuration(null);
+            }}
+          >
+            Remove voice note
+          </Button>
+        ) : null}
+      </div>
+      {file ? (
+        <NoticeBanner variant="success">
+          Attached voice note: <strong>{file.name}</strong>
+          {voiceNoteDuration ? ` (${Math.max(1, voiceNoteDuration)} sec)` : ""}
+        </NoticeBanner>
+      ) : null}
+      <Textarea
+        placeholder="Paste or generate transcript text from the mic popup"
+        value={transcriptText}
+        onChange={(e) => setTranscriptText(e.target.value)}
+        rows={6}
+      />
       <div className="grid grid-cols-2 gap-3">
         <Input placeholder="Police Station (optional)" value={policeStation} onChange={(e) => setPoliceStation(e.target.value)} />
         <Input placeholder="Complainant Name (optional)" value={complainantName} onChange={(e) => setComplainantName(e.target.value)} />
@@ -278,6 +327,13 @@ function VoiceTab({ draftRole, language }: { draftRole: DraftRole; language: Dra
       {loading && <LoadingState />}
       {error && <NoticeBanner variant="error">{error}</NoticeBanner>}
       {(preview || submitted) && <FIRResult data={preview || submitted} />}
+      <VoiceTranscriptionDialog
+        open={recorderOpen}
+        onOpenChange={setRecorderOpen}
+        onApply={handleRecorderApply}
+        initialTranscript={transcriptText}
+        language={language}
+      />
     </div>
   );
 }

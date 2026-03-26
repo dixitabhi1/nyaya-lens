@@ -1,19 +1,27 @@
 import { FileUp, X } from "lucide-react";
-import { useCallback, useState, DragEvent } from "react";
+import { useCallback, useState, DragEvent, MouseEvent } from "react";
 
 interface FileUploadProps {
-  onFile: (file: File) => void;
+  onFile: (file: File | null) => void;
   accept?: string;
   label?: string;
+  file?: File | null;
 }
 
-export function FileUpload({ onFile, accept, label = "Upload file" }: FileUploadProps) {
-  const [file, setFile] = useState<File | null>(null);
+export function FileUpload({ onFile, accept, label = "Upload file", file: controlledFile }: FileUploadProps) {
+  const [internalFile, setInternalFile] = useState<File | null>(null);
   const [dragging, setDragging] = useState(false);
+  const file = controlledFile !== undefined ? controlledFile : internalFile;
 
   const handleFile = useCallback((f: File) => {
-    setFile(f);
+    setInternalFile(f);
     onFile(f);
+  }, [onFile]);
+
+  const clearFile = useCallback((event: MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+    setInternalFile(null);
+    onFile(null);
   }, [onFile]);
 
   const onDrop = useCallback((e: DragEvent) => {
@@ -45,7 +53,7 @@ export function FileUpload({ onFile, accept, label = "Upload file" }: FileUpload
         <div className="flex items-center justify-center gap-2">
           <FileUp className="h-4 w-4 text-success" />
           <span className="text-sm font-medium">{file.name}</span>
-          <button onClick={(e) => { e.stopPropagation(); setFile(null); }} className="text-muted-foreground hover:text-destructive">
+          <button onClick={clearFile} className="text-muted-foreground hover:text-destructive">
             <X className="h-4 w-4" />
           </button>
         </div>
