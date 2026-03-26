@@ -41,7 +41,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="space-y-3">
           <div className="flex items-center gap-3">
-            <BrandMark showText={false} imageClassName="h-11 w-11" />
+            <BrandMark showText={false} markClassName="h-11 w-11" imageClassName="h-5 w-5" />
             <div>
               <CardTitle className="text-2xl">Welcome back</CardTitle>
               <CardDescription>Sign in to continue using NyayaSetu.</CardDescription>

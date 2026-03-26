@@ -74,7 +74,8 @@ export function AppSidebar() {
         {!collapsed && (
           <div className="px-4 py-5 border-b border-sidebar-border">
             <BrandMark
-              imageClassName="h-9 w-9"
+              markClassName="h-9 w-9 rounded-lg"
+              imageClassName="h-5 w-5"
               titleClassName="text-base text-sidebar-accent-foreground"
               subtitle="AI Legal Intelligence"
               subtitleClassName="text-[11px] tracking-normal uppercase text-sidebar-foreground/60"

@@ -20,8 +20,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
               <SidebarTrigger />
               <BrandMark
                 className="gap-2"
-                markClassName="shrink-0"
-                imageClassName="h-8 w-8"
+                markClassName="h-8 w-8 rounded-lg"
+                imageClassName="h-4 w-4"
                 titleClassName="text-lg text-foreground"
                 showText
               />

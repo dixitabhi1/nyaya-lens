@@ -100,7 +100,11 @@ const Index = () => {
       <header className="sticky top-0 z-30 border-b border-slate-200/70 bg-white/80 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <Link to="/" className="flex items-center gap-3">
-            <BrandMark subtitle="AI legal bridge" />
+            <BrandMark
+              markClassName="h-11 w-11 rounded-2xl bg-slate-950 text-amber-100 shadow-lg shadow-slate-950/15"
+              imageClassName="h-5 w-5 text-amber-100"
+              subtitle="AI legal bridge"
+            />
           </Link>
 
           <div className="hidden items-center gap-6 text-sm font-medium text-slate-600 lg:flex">

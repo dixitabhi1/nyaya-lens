@@ -1,3 +1,4 @@
+import { Scale } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type BrandMarkProps = {
@@ -21,8 +22,13 @@ export function BrandMark({
 }: BrandMarkProps) {
   return (
     <div className={cn("flex items-center gap-3", className)}>
-      <div className={cn("shrink-0", markClassName)}>
-        <img src="/nyayasetu-mark.svg" alt="NyayaSetu" className={cn("h-11 w-11", imageClassName)} />
+      <div
+        className={cn(
+          "shrink-0 rounded-xl gradient-accent flex items-center justify-center shadow-sm",
+          markClassName,
+        )}
+      >
+        <Scale className={cn("h-5 w-5 text-accent-foreground", imageClassName)} />
       </div>
       {showText ? (
         <div>
