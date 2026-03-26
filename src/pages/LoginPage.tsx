@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
-import { Scale } from "lucide-react";
+import { BrandMark } from "@/components/BrandMark";
 import { useAuth } from "@/lib/auth-context";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -41,9 +41,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="space-y-3">
           <div className="flex items-center gap-3">
-            <div className="h-11 w-11 rounded-xl gradient-accent flex items-center justify-center">
-              <Scale className="h-5 w-5 text-accent-foreground" />
-            </div>
+            <BrandMark showText={false} imageClassName="h-11 w-11" />
             <div>
               <CardTitle className="text-2xl">Welcome back</CardTitle>
               <CardDescription>Sign in to continue using NyayaSetu.</CardDescription>

@@ -13,9 +13,9 @@ import {
   PenTool,
   Microscope,
   Landmark,
-  Scale,
   Shield,
 } from "lucide-react";
+import { BrandMark } from "@/components/BrandMark";
 import { NavLink } from "@/components/NavLink";
 import { useInbox } from "@/lib/inbox-context";
 import { useAuth } from "@/lib/auth-context";
@@ -73,15 +73,12 @@ export function AppSidebar() {
       <SidebarContent>
         {!collapsed && (
           <div className="px-4 py-5 border-b border-sidebar-border">
-            <div className="flex items-center gap-2.5">
-              <div className="h-9 w-9 rounded-lg gradient-accent flex items-center justify-center">
-                <Scale className="h-5 w-5 text-accent-foreground" />
-              </div>
-              <div>
-                <h2 className="font-display text-base font-bold text-sidebar-accent-foreground tracking-tight">NyayaSetu</h2>
-                <p className="text-[11px] text-sidebar-foreground/60">AI Legal Intelligence</p>
-              </div>
-            </div>
+            <BrandMark
+              imageClassName="h-9 w-9"
+              titleClassName="text-base text-sidebar-accent-foreground"
+              subtitle="AI Legal Intelligence"
+              subtitleClassName="text-[11px] tracking-normal uppercase text-sidebar-foreground/60"
+            />
           </div>
         )}
         <SidebarGroup>

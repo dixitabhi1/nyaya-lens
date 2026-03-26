@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
-import { Briefcase, Landmark, Scale, ShieldCheck, UserRound } from "lucide-react";
+import { Briefcase, Landmark, ShieldCheck, UserRound } from "lucide-react";
+import { BrandMark } from "@/components/BrandMark";
 import { useAuth } from "@/lib/auth-context";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -77,9 +78,7 @@ export default function RegisterPage() {
       <Card className="w-full shadow-lg">
         <CardHeader className="space-y-3">
           <div className="flex items-center gap-3">
-            <div className="h-11 w-11 rounded-xl gradient-accent flex items-center justify-center">
-              <Scale className="h-5 w-5 text-accent-foreground" />
-            </div>
+            <BrandMark showText={false} imageClassName="h-11 w-11" />
             <div>
               <CardTitle className="text-2xl">Create account</CardTitle>
               <CardDescription>
