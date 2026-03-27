@@ -6,7 +6,7 @@ Recommended deployment split:
 
 - Frontend: Vercel
 - Backend API: Hugging Face Space
-- Frontend custom domain: `www.yourdomain.com`
+- Frontend custom domain: `[Link(https://nyaya-lens.vercel.app/)`
 - Backend API URL: `https://abhishek785-nyaya-setu.hf.space/api/v1`
 
 ## Environment variables
