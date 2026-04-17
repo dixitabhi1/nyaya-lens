@@ -532,3 +532,125 @@ export function createMessagesWebSocket(token: string): WebSocket {
   const wsBase = BASE_URL.replace(/^http/i, (protocol) => (protocol.toLowerCase() === "https" ? "wss" : "ws"));
   return new WebSocket(`${wsBase}/messages/ws?token=${encodeURIComponent(token)}`);
 }
+
+export type DocumentTemplateField = {
+  key: string;
+  label: string;
+  input_type: string;
+  placeholder?: string | null;
+  help_text?: string | null;
+  required: boolean;
+  options: string[];
+};
+
+export type DocumentTemplateSummary = {
+  id: number;
+  slug: string;
+  title: string;
+  document_type: string;
+  category: string;
+  description: string;
+  price_paise: number;
+  price_display: string;
+  currency: string;
+  is_free: boolean;
+  uploaded_by_name: string;
+  uploaded_by_handle?: string | null;
+  uploaded_by_role: string;
+  purchase_count: number;
+  buyer_count: number;
+  field_count: number;
+  tags: string[];
+  preview_excerpt: string;
+  can_edit: boolean;
+  has_access: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type DocumentTemplateDetail = DocumentTemplateSummary & {
+  fields: DocumentTemplateField[];
+  sample_input: Record<string, string>;
+  template_body_preview: string;
+  payment_gateway_ready: boolean;
+};
+
+export type DocumentOrderSummary = {
+  id: number;
+  template_id: number;
+  template_title: string;
+  template_slug: string;
+  amount_paise: number;
+  amount_display: string;
+  payment_status: string;
+  payment_provider?: string | null;
+  access_granted: boolean;
+  generated_document_excerpt?: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type DocumentOrderDetail = DocumentOrderSummary & {
+  buyer_answers: Record<string, string>;
+  generated_document_text?: string | null;
+  gateway_order_id?: string | null;
+};
+
+export type DocumentPaymentSession = {
+  provider: string;
+  public_key: string;
+  order_reference: string;
+  amount_paise: number;
+  currency: string;
+  business_name: string;
+  description: string;
+  buyer_email?: string | null;
+  buyer_name?: string | null;
+};
+
+export type DocumentTemplateCheckoutResponse = {
+  order: DocumentOrderDetail;
+  payment_required: boolean;
+  gateway_ready: boolean;
+  checkout?: DocumentPaymentSession | null;
+  message: string;
+};
+
+export const getDocumentTemplates = (params?: {
+  query?: string;
+  documentType?: string;
+  category?: string;
+  onlyFree?: boolean;
+  mineOnly?: boolean;
+  limit?: number;
+}) => {
+  const search = new URLSearchParams();
+  if (params?.query) search.set("query", params.query);
+  if (params?.documentType) search.set("document_type", params.documentType);
+  if (params?.category) search.set("category", params.category);
+  if (typeof params?.onlyFree === "boolean") search.set("only_free", String(params.onlyFree));
+  if (typeof params?.mineOnly === "boolean") search.set("mine_only", String(params.mineOnly));
+  if (typeof params?.limit === "number") search.set("limit", String(params.limit));
+  const suffix = search.toString() ? `?${search.toString()}` : "";
+  return get<{ templates: DocumentTemplateSummary[] }>(`/documents/templates${suffix}`);
+};
+
+export const getDocumentTemplate = (templateId: number) =>
+  get<DocumentTemplateDetail>(`/documents/templates/${templateId}`);
+
+export const createDocumentTemplate = (formData: FormData) =>
+  postForm<DocumentTemplateDetail>("/documents/templates", formData);
+
+export const checkoutDocumentTemplate = (templateId: number, answers: Record<string, string>) =>
+  post<DocumentTemplateCheckoutResponse>(`/documents/templates/${templateId}/checkout`, { answers });
+
+export const verifyDocumentPayment = (
+  orderId: number,
+  payload: { provider: string; payment_id: string; order_reference: string; signature: string },
+) => post<DocumentOrderDetail>(`/documents/orders/${orderId}/verify-payment`, payload);
+
+export const getMyDocumentOrders = (limit = 25) =>
+  get<{ orders: DocumentOrderSummary[] }>(`/documents/orders/mine?limit=${limit}`);
+
+export const getDocumentOrder = (orderId: number) =>
+  get<DocumentOrderDetail>(`/documents/orders/${orderId}`);
