@@ -55,7 +55,7 @@ function initials(name: string) {
 }
 
 const Index = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const [lawyers, setLawyers] = useState<LawyerSummary[]>(fallbackLawyerDirectoryResponse.lawyers);
   const [posts, setPosts] = useState<LawyerNetworkPost[]>(fallbackLawyerNetworkFeedResponse.posts);
   const [policeCards, setPoliceCards] = useState<PoliceDashboardCard[]>(fallbackPoliceDashboardResponse.cards);
@@ -65,35 +65,45 @@ const Index = () => {
     let active = true;
 
     async function loadLandingData() {
-      try {
-        const [directory, feed, police] = await Promise.all([
-          getLawyers({ limit: 3 }),
-          getLawyerNetworkFeed(3),
-          getPoliceDashboard(4),
-        ]);
-        if (!active) {
-          return;
-        }
-        setLawyers(directory.lawyers);
-        setPosts(feed.posts);
-        setPoliceCards(police.cards);
-        setUsingFallback(false);
-      } catch {
-        if (!active) {
-          return;
-        }
-        setLawyers(fallbackLawyerDirectoryResponse.lawyers);
-        setPosts(fallbackLawyerNetworkFeedResponse.posts);
-        setPoliceCards(fallbackPoliceDashboardResponse.cards);
-        setUsingFallback(true);
+      const [directory, feed, police] = await Promise.allSettled([
+        getLawyers({ limit: 3 }),
+        getLawyerNetworkFeed(3),
+        user?.can_access_police_dashboard ? getPoliceDashboard(4) : Promise.resolve(null),
+      ]);
+      if (!active) {
+        return;
       }
+      let usedFallback = false;
+
+      if (directory.status === "fulfilled") {
+        setLawyers(directory.value.lawyers);
+      } else {
+        setLawyers(fallbackLawyerDirectoryResponse.lawyers);
+        usedFallback = true;
+      }
+
+      if (feed.status === "fulfilled") {
+        setPosts(feed.value.posts);
+      } else {
+        setPosts(fallbackLawyerNetworkFeedResponse.posts);
+        usedFallback = true;
+      }
+
+      if (police.status === "fulfilled" && police.value) {
+        setPoliceCards(police.value.cards);
+      } else {
+        setPoliceCards(fallbackPoliceDashboardResponse.cards);
+        usedFallback = usedFallback || Boolean(user?.can_access_police_dashboard);
+      }
+
+      setUsingFallback(usedFallback);
     }
 
     void loadLandingData();
     return () => {
       active = false;
     };
-  }, []);
+  }, [user?.can_access_police_dashboard]);
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(199,167,88,0.16),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(15,23,42,0.12),transparent_28%),linear-gradient(180deg,#f8fafc_0%,#eef2ff_50%,#f8fafc_100%)]">

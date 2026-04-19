@@ -5,23 +5,52 @@ const RAW_BASE_URL = import.meta.env.VITE_API_BASE_URL || DEFAULT_API_BASE_URL;
 const BASE_URL = RAW_BASE_URL.replace(/\/+$/, "");
 export const SWAGGER_URL =
   import.meta.env.VITE_SWAGGER_URL || BASE_URL.replace(/\/api\/v1$/i, "/docs");
+const DEFAULT_REQUEST_TIMEOUT_MS = 15000;
+
+function requestTimeoutMsFor(path: string): number {
+  if (path.startsWith("/auth/")) {
+    return 12000;
+  }
+  if (path === "/lawyers/register") {
+    return 18000;
+  }
+  return DEFAULT_REQUEST_TIMEOUT_MS;
+}
+
+function timeoutMessageFor(path: string): string {
+  if (path === "/lawyers/register") {
+    return "Lawyer profile submission is taking too long. Please try again in a few moments.";
+  }
+  if (path.startsWith("/auth/")) {
+    return "NyayaSetu is taking too long to respond. Please try signing in again shortly.";
+  }
+  return "NyayaSetu is taking too long to respond. Please try again shortly.";
+}
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const token = getAuthToken();
+  const controller = new AbortController();
+  const timeoutId = globalThis.setTimeout(() => controller.abort(), requestTimeoutMsFor(path));
   let res: Response;
   try {
     res = await fetch(`${BASE_URL}${path}`, {
       ...options,
+      signal: controller.signal,
       headers: {
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...(options?.body instanceof FormData ? {} : { "Content-Type": "application/json" }),
         ...options?.headers,
       },
     });
-  } catch {
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      throw new Error(timeoutMessageFor(path));
+    }
     throw new Error(
       "Unable to connect to the NyayaSetu API. Check the backend URL or try again shortly.",
     );
+  } finally {
+    globalThis.clearTimeout(timeoutId);
   }
   if (!res.ok) {
     if (res.status === 401) {

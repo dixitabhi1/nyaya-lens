@@ -32,32 +32,37 @@ export default function DashboardPage() {
     let active = true;
 
     async function loadSidebarData() {
-      try {
-        const [directory, police] = await Promise.all([
-          getLawyers({ limit: 3 }),
-          getPoliceDashboard(3),
-        ]);
-        if (!active) {
-          return;
-        }
-        setLawyers(mergeLawyerDirectoryWithCache(directory).lawyers);
-        setPoliceCards(police.cards);
-        setUsingFallback(false);
-      } catch {
-        if (!active) {
-          return;
-        }
-        setLawyers(mergeLawyerDirectoryWithCache(fallbackLawyerDirectoryResponse).lawyers);
-        setPoliceCards(fallbackPoliceDashboardResponse.cards);
-        setUsingFallback(true);
+      const [directory, police] = await Promise.allSettled([
+        getLawyers({ limit: 3 }),
+        user?.can_access_police_dashboard ? getPoliceDashboard(3) : Promise.resolve(null),
+      ]);
+      if (!active) {
+        return;
       }
+      let usedFallback = false;
+
+      if (directory.status === "fulfilled") {
+        setLawyers(mergeLawyerDirectoryWithCache(directory.value).lawyers);
+      } else {
+        setLawyers(mergeLawyerDirectoryWithCache(fallbackLawyerDirectoryResponse).lawyers);
+        usedFallback = true;
+      }
+
+      if (police.status === "fulfilled" && police.value) {
+        setPoliceCards(police.value.cards);
+      } else {
+        setPoliceCards(fallbackPoliceDashboardResponse.cards);
+        usedFallback = usedFallback || Boolean(user?.can_access_police_dashboard);
+      }
+
+      setUsingFallback(usedFallback);
     }
 
     void loadSidebarData();
     return () => {
       active = false;
     };
-  }, []);
+  }, [user?.can_access_police_dashboard]);
 
   return (
     <div className="min-h-full bg-[radial-gradient(circle_at_top_right,rgba(250,204,21,0.16),transparent_20%),linear-gradient(180deg,#f8fafc_0%,#eff6ff_45%,#f8fafc_100%)] px-4 py-6 sm:px-6 lg:px-8">
