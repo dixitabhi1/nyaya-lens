@@ -61,6 +61,25 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
       }
     }
     const text = await res.text();
+    if (/<!doctype html|<html/i.test(text)) {
+      throw new Error(
+        `API Error ${res.status}: Backend returned HTML instead of JSON. Check the deployed API or inference URL configuration.`,
+      );
+    }
+    try {
+      const json = JSON.parse(text);
+      const detail = json?.detail;
+      if (typeof detail === "string" && /<!doctype html|<html/i.test(detail)) {
+        throw new Error(
+          `API Error ${res.status}: Backend received an HTML page instead of JSON. Check the deployed API or inference URL configuration.`,
+        );
+      }
+      if (typeof detail === "string" && detail.trim()) {
+        throw new Error(`API Error ${res.status}: ${detail}`);
+      }
+    } catch (error) {
+      if (error instanceof Error && error.message.startsWith("API Error")) throw error;
+    }
     throw new Error(`API Error ${res.status}: ${text}`);
   }
   return res.json();
