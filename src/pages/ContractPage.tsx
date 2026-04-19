@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { analyzeContract } from "@/services/api";
+import { analyzeContract, type ContractAnalysisResponse } from "@/services/api";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { ResultCard } from "@/components/shared/ResultCard";
 import { FileUpload } from "@/components/shared/FileUpload";
@@ -16,7 +16,7 @@ export default function ContractPage() {
   const [file, setFile] = useState<File | null>(null);
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<ContractAnalysisResponse | null>(null);
   const [error, setError] = useState("");
 
   const handleSubmit = async () => {
@@ -55,26 +55,41 @@ export default function ContractPage() {
 
       {result && (
         <div className="space-y-4 animate-fade-in">
-          {result.summary && <ResultCard title="Contract Summary"><p className="text-sm whitespace-pre-wrap">{result.summary}</p></ResultCard>}
+          {result.final_summary && <ResultCard title="Contract Summary"><p className="text-sm whitespace-pre-wrap">{result.final_summary}</p></ResultCard>}
+          <ResultCard title="Risk Overview">
+            <div className="flex flex-wrap items-center gap-3 text-sm">
+              <StatusPill
+                label={`${result.risk_level} Risk`}
+                variant={result.risk_level === "High" ? "error" : result.risk_level === "Moderate" ? "warning" : "success"}
+              />
+              <p className="font-medium">{result.risk_score}/100</p>
+              {result.contract_type && <p className="text-muted-foreground">{result.contract_type}</p>}
+            </div>
+            {result.parties?.length > 0 && <p className="mt-3 text-sm text-muted-foreground">Parties: {result.parties.join(", ")}</p>}
+          </ResultCard>
+          {result.key_risks?.length > 0 && (
+            <ResultCard title="Key Risks">
+              <ul className="list-disc list-inside text-sm space-y-1">
+                {result.key_risks.map((risk, index) => <li key={index}>{risk}</li>)}
+              </ul>
+            </ResultCard>
+          )}
           {result.clauses && result.clauses.length > 0 && (
             <ResultCard title="Extracted Clauses">
               <div className="space-y-3">
-                {result.clauses.map((c: any, i: number) => (
+                {result.clauses.map((c, i) => (
                   <div key={i} className="border rounded-md p-3">
-                    <p className="text-sm font-medium">{c.title || c.name || `Clause ${i + 1}`}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{c.text || c.content || JSON.stringify(c)}</p>
-                  </div>
-                ))}
-              </div>
-            </ResultCard>
-          )}
-          {result.risks && result.risks.length > 0 && (
-            <ResultCard title="Risk Analysis">
-              <div className="space-y-2">
-                {result.risks.map((r: any, i: number) => (
-                  <div key={i} className="flex items-start gap-2">
-                    <StatusPill label={r.severity || "Risk"} variant={r.severity === "high" ? "error" : "warning"} />
-                    <p className="text-sm">{typeof r === "string" ? r : r.issue || r.description || r.text}</p>
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <p className="text-sm font-medium">{c.clause_name || `Clause ${i + 1}`}</p>
+                      <StatusPill
+                        label={c.risk_level}
+                        variant={c.risk_level === "High" ? "error" : c.risk_level === "Medium" ? "warning" : "success"}
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2">{c.summary}</p>
+                    {c.issue && <p className="text-sm mt-2"><span className="font-medium">Issue:</span> {c.issue}</p>}
+                    {c.suggestion && <p className="text-sm mt-2"><span className="font-medium">Suggestion:</span> {c.suggestion}</p>}
+                    {c.improved_clause && <p className="text-sm mt-2 whitespace-pre-wrap"><span className="font-medium">Improved Clause:</span> {c.improved_clause}</p>}
                   </div>
                 ))}
               </div>
@@ -83,6 +98,13 @@ export default function ContractPage() {
           {result.missing_clauses && result.missing_clauses.length > 0 && (
             <ResultCard title="Missing Clauses">
               <ul className="list-disc list-inside text-sm space-y-1">{result.missing_clauses.map((m: string, i: number) => <li key={i}>{m}</li>)}</ul>
+            </ResultCard>
+          )}
+          {result.negotiation_insights?.length > 0 && (
+            <ResultCard title="Negotiation Insights">
+              <ul className="list-disc list-inside text-sm space-y-1">
+                {result.negotiation_insights.map((insight, index) => <li key={index}>{insight}</li>)}
+              </ul>
             </ResultCard>
           )}
         </div>

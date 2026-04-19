@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { analyzeCase } from "@/services/api";
+import { analyzeCase, type CaseAnalysisResponse } from "@/services/api";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { ResultCard } from "@/components/shared/ResultCard";
 import { CitationCard } from "@/components/shared/CitationCard";
@@ -14,7 +14,7 @@ import { Search } from "lucide-react";
 export default function CaseAnalysisPage() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<CaseAnalysisResponse | null>(null);
   const [error, setError] = useState("");
 
   const handleSubmit = async () => {
@@ -56,34 +56,101 @@ export default function CaseAnalysisPage() {
 
       {result && (
         <div className="space-y-4 animate-fade-in">
-          {result.case_summary && <ResultCard title="Case Summary"><p className="text-sm whitespace-pre-wrap">{result.case_summary}</p></ResultCard>}
-          {result.applicable_laws && (
+          {result.final_analysis && <ResultCard title="Final Analysis"><p className="text-sm whitespace-pre-wrap">{result.final_analysis}</p></ResultCard>}
+          {(result.case_summary || result.case_type) && (
+            <ResultCard title="Case Overview">
+              <div className="space-y-2 text-sm">
+                {result.case_summary && <p className="whitespace-pre-wrap">{result.case_summary}</p>}
+                {result.case_type && <p><span className="font-medium">Case Type:</span> {result.case_type}</p>}
+                {result.parties?.length > 0 && <p><span className="font-medium">Parties:</span> {result.parties.join(", ")}</p>}
+              </div>
+            </ResultCard>
+          )}
+          {result.key_facts?.length > 0 && (
+            <ResultCard title="Key Facts">
+              <ul className="list-disc list-inside text-sm space-y-1">
+                {result.key_facts.map((fact, index) => <li key={index}>{fact}</li>)}
+              </ul>
+            </ResultCard>
+          )}
+          {result.legal_issues?.length > 0 && (
+            <ResultCard title="Legal Issues">
+              <ul className="list-disc list-inside text-sm space-y-1">
+                {result.legal_issues.map((issue, index) => <li key={index}>{issue}</li>)}
+              </ul>
+            </ResultCard>
+          )}
+          {result.legal_sections && (
             <ResultCard title="Applicable Laws">
-              {Array.isArray(result.applicable_laws) ? (
-                <ul className="list-disc list-inside text-sm space-y-1">{result.applicable_laws.map((l: string, i: number) => <li key={i}>{l}</li>)}</ul>
-              ) : <p className="text-sm whitespace-pre-wrap">{result.applicable_laws}</p>}
+              <ul className="list-disc list-inside text-sm space-y-1">
+                {(result.legal_sections.length > 0 ? result.legal_sections : result.applicable_laws).map((law, i) => <li key={i}>{law}</li>)}
+              </ul>
+            </ResultCard>
+          )}
+          {result.strengths?.length > 0 && (
+            <ResultCard title="Strengths">
+              <ul className="list-disc list-inside text-sm space-y-1">
+                {result.strengths.map((item, index) => <li key={index}>{item}</li>)}
+              </ul>
+            </ResultCard>
+          )}
+          {result.weaknesses?.length > 0 && (
+            <ResultCard title="Risks and Weaknesses">
+              <ul className="list-disc list-inside text-sm space-y-1">
+                {result.weaknesses.map((item, index) => <li key={index}>{item}</li>)}
+              </ul>
+            </ResultCard>
+          )}
+          {result.missing_elements?.length > 0 && (
+            <ResultCard title="Missing Elements">
+              <ul className="list-disc list-inside text-sm space-y-1">
+                {result.missing_elements.map((item, index) => <li key={index}>{item}</li>)}
+              </ul>
             </ResultCard>
           )}
           {result.legal_reasoning && <ResultCard title="Legal Reasoning"><p className="text-sm whitespace-pre-wrap text-muted-foreground">{result.legal_reasoning}</p></ResultCard>}
           {result.possible_punishment && <ResultCard title="Possible Punishment"><p className="text-sm">{result.possible_punishment}</p></ResultCard>}
-          {result.evidence_required && (
+          {result.evidence_required?.length > 0 && (
             <ResultCard title="Evidence Required">
-              {Array.isArray(result.evidence_required) ? (
-                <ul className="list-disc list-inside text-sm space-y-1">{result.evidence_required.map((e: string, i: number) => <li key={i}>{e}</li>)}</ul>
-              ) : <p className="text-sm">{result.evidence_required}</p>}
+              <ul className="list-disc list-inside text-sm space-y-1">{result.evidence_required.map((e, i) => <li key={i}>{e}</li>)}</ul>
             </ResultCard>
           )}
-          {result.recommended_next_steps && (
+          {result.possible_outcomes?.length > 0 && (
+            <ResultCard title="Possible Outcomes">
+              <ul className="list-disc list-inside text-sm space-y-1">
+                {result.possible_outcomes.map((item, index) => <li key={index}>{item}</li>)}
+              </ul>
+            </ResultCard>
+          )}
+          {(result.suggested_actions?.length > 0 || result.recommended_next_steps?.length > 0) && (
             <ResultCard title="Next Steps">
-              {Array.isArray(result.recommended_next_steps) ? (
-                <ol className="list-decimal list-inside text-sm space-y-1">{result.recommended_next_steps.map((s: string, i: number) => <li key={i}>{s}</li>)}</ol>
-              ) : <p className="text-sm">{result.recommended_next_steps}</p>}
+              <ol className="list-decimal list-inside text-sm space-y-1">
+                {(result.suggested_actions.length > 0 ? result.suggested_actions : result.recommended_next_steps).map((step, i) => <li key={i}>{step}</li>)}
+              </ol>
+            </ResultCard>
+          )}
+          {result.similar_cases?.length > 0 && (
+            <ResultCard title="Similar Cases">
+              <div className="space-y-3">
+                {result.similar_cases.map((item, index) => (
+                  <div key={`${item.case_title}-${index}`} className="rounded-lg border border-border/70 p-3 text-sm">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <p className="font-medium">{item.case_title}</p>
+                      {item.similarity_score && <span className="text-xs text-muted-foreground">{item.similarity_score}</span>}
+                    </div>
+                    <p className="mt-1 text-muted-foreground">{item.court}</p>
+                    {item.relevance && <p className="mt-2">{item.relevance}</p>}
+                    {item.comparison_reasoning && <p className="mt-2 text-muted-foreground">{item.comparison_reasoning}</p>}
+                    {item.source_link && <a className="mt-2 inline-block text-primary underline-offset-4 hover:underline" href={item.source_link} target="_blank" rel="noreferrer">Open source</a>}
+                  </div>
+                ))}
+              </div>
             </ResultCard>
           )}
           {result.sources && result.sources.length > 0 && (
             <div>
               <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Sources</h4>
-              <div className="grid gap-2 sm:grid-cols-2">{result.sources.map((s: any, i: number) => <CitationCard key={i} source={s} />)}</div>
+              <div className="grid gap-2 sm:grid-cols-2">{result.sources.map((s, i) => <CitationCard key={i} source={s} />)}</div>
             </div>
           )}
         </div>

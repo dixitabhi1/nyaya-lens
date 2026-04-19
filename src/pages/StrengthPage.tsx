@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { predictStrength } from "@/services/api";
+import { predictStrength, type CaseStrengthResponse } from "@/services/api";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { ResultCard } from "@/components/shared/ResultCard";
 import { LoadingState } from "@/components/shared/LoadingState";
@@ -14,7 +14,7 @@ import { TrendingUp } from "lucide-react";
 export default function StrengthPage() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<CaseStrengthResponse | null>(null);
   const [error, setError] = useState("");
 
   const handleSubmit = async () => {
@@ -22,16 +22,7 @@ export default function StrengthPage() {
     setLoading(true);
     setError("");
     try {
-      const evidenceItems = /\b(screenshot|invoice|recording|photo|video|cctv|document|statement)\b/i.test(input) ? 2 : 0;
-      const witnessCount = /\bwitness|saw|seen by\b/i.test(input) ? 1 : 0;
-      const res = await predictStrength({
-        evidence_items: evidenceItems,
-        witness_count: witnessCount,
-        documentary_support: /\b(document|invoice|statement|receipt)\b/i.test(input),
-        police_complaint_filed: /\bfir|complaint filed|police complaint\b/i.test(input),
-        incident_recency_days: /\byesterday|today|last night\b/i.test(input) ? 1 : 30,
-        jurisdiction_match: true,
-      });
+      const res = await predictStrength({ case_description: input });
       setResult(res);
     } catch (e: any) {
       setError(e.message);
@@ -66,31 +57,67 @@ export default function StrengthPage() {
         <div className="space-y-4 animate-fade-in">
           <ResultCard title="Strength Assessment">
             <div className="flex items-center gap-4 mb-4">
-              {result.score !== undefined && (
+              {result.case_strength_score !== undefined && (
                 <div className="text-center">
-                  <div className="text-4xl font-display font-bold text-foreground">{result.score}<span className="text-lg text-muted-foreground">/100</span></div>
-                  <StatusPill label={result.verdict || (result.score >= 70 ? "Strong" : result.score >= 40 ? "Moderate" : "Weak")} variant={getScoreVariant(result.score)} />
+                  <div className="text-4xl font-display font-bold text-foreground">{result.case_strength_score}<span className="text-lg text-muted-foreground">/100</span></div>
+                  <StatusPill label={result.strength_label} variant={getScoreVariant(result.case_strength_score)} />
                 </div>
               )}
               <div className="flex-1 h-3 bg-secondary rounded-full overflow-hidden">
                 <div
                   className="h-full rounded-full transition-all duration-700"
                   style={{
-                    width: `${result.score || 0}%`,
-                    background: result.score >= 70 ? "hsl(var(--success))" : result.score >= 40 ? "hsl(var(--warning))" : "hsl(var(--destructive))",
+                    width: `${result.case_strength_score || 0}%`,
+                    background: result.case_strength_score >= 70 ? "hsl(var(--success))" : result.case_strength_score >= 40 ? "hsl(var(--warning))" : "hsl(var(--destructive))",
                   }}
                 />
               </div>
             </div>
           </ResultCard>
-          {result.verdict && <ResultCard title="Verdict"><p className="text-sm font-medium">{result.verdict}</p></ResultCard>}
-          {result.rationale && (
-            <ResultCard title="Rationale">
-              {Array.isArray(result.rationale) ? (
-                <ul className="list-disc list-inside text-sm space-y-1 text-muted-foreground">
-                  {result.rationale.map((line: string, index: number) => <li key={index}>{line}</li>)}
-                </ul>
-              ) : <p className="text-sm whitespace-pre-wrap text-muted-foreground">{result.rationale}</p>}
+          {result.final_analysis && <ResultCard title="Final Analysis"><p className="text-sm whitespace-pre-wrap">{result.final_analysis}</p></ResultCard>}
+          {result.key_strengths?.length > 0 && (
+            <ResultCard title="Key Strengths">
+              <ul className="list-disc list-inside text-sm space-y-1 text-muted-foreground">
+                {result.key_strengths.map((line, index) => <li key={index}>{line}</li>)}
+              </ul>
+            </ResultCard>
+          )}
+          {result.key_weaknesses?.length > 0 && (
+            <ResultCard title="Key Weaknesses">
+              <ul className="list-disc list-inside text-sm space-y-1 text-muted-foreground">
+                {result.key_weaknesses.map((line, index) => <li key={index}>{line}</li>)}
+              </ul>
+            </ResultCard>
+          )}
+          {result.missing_elements?.length > 0 && (
+            <ResultCard title="Missing Elements">
+              <ul className="list-disc list-inside text-sm space-y-1 text-muted-foreground">
+                {result.missing_elements.map((line, index) => <li key={index}>{line}</li>)}
+              </ul>
+            </ResultCard>
+          )}
+          {result.suggested_sections?.length > 0 && (
+            <ResultCard title="Suggested Sections">
+              <ul className="list-disc list-inside text-sm space-y-1 text-muted-foreground">
+                {result.suggested_sections.map((line, index) => <li key={index}>{line}</li>)}
+              </ul>
+            </ResultCard>
+          )}
+          {result.similar_cases?.length > 0 && (
+            <ResultCard title="Similar Cases">
+              <div className="space-y-3">
+                {result.similar_cases.map((item, index) => (
+                  <div key={`${item.case_title}-${index}`} className="rounded-lg border border-border/70 p-3 text-sm">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="font-medium">{item.case_title}</p>
+                      {item.similarity_score && <span className="text-xs text-muted-foreground">{item.similarity_score}</span>}
+                    </div>
+                    <p className="mt-1 text-muted-foreground">{item.court}</p>
+                    {item.relevance_reason && <p className="mt-2">{item.relevance_reason}</p>}
+                    {item.source_link && <a className="mt-2 inline-block text-primary underline-offset-4 hover:underline" href={item.source_link} target="_blank" rel="noreferrer">Open source</a>}
+                  </div>
+                ))}
+              </div>
             </ResultCard>
           )}
         </div>

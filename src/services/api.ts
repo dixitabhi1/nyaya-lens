@@ -375,6 +375,106 @@ export type ConversationDetailResponse = {
   messages: DirectMessage[];
 };
 
+export type SimilarCaseReference = {
+  case_title: string;
+  court: string;
+  verdict: string;
+  source_link: string;
+  similarity_score?: string | null;
+  parties?: string | null;
+  fir_summary?: string | null;
+  charges?: string | null;
+  comparison_reasoning?: string | null;
+  relevance?: string | null;
+  relevance_reason?: string | null;
+};
+
+export type CaseAnalysisResponse = {
+  case_type: string;
+  parties: string[];
+  legal_sections: string[];
+  key_facts: string[];
+  legal_issues: string[];
+  strengths: string[];
+  weaknesses: string[];
+  missing_elements: string[];
+  possible_outcomes: string[];
+  suggested_actions: string[];
+  similar_cases: SimilarCaseReference[];
+  final_analysis: string;
+  case_summary?: string | null;
+  applicable_laws: string[];
+  legal_reasoning?: string | null;
+  possible_punishment?: string | null;
+  evidence_required: string[];
+  recommended_next_steps: string[];
+  sources: any[];
+};
+
+export type CaseStrengthResponse = {
+  case_strength_score: number;
+  strength_label: string;
+  key_strengths: string[];
+  key_weaknesses: string[];
+  missing_elements: string[];
+  suggested_sections: string[];
+  similar_cases: SimilarCaseReference[];
+  final_analysis: string;
+  score?: number | null;
+  verdict?: string | null;
+  rationale: string[];
+};
+
+export type ResearchCaseResult = {
+  case_title: string;
+  court: string;
+  similarity_score: string;
+  parties: string;
+  fir_summary: string;
+  charges: string;
+  verdict: string;
+  source_link: string;
+  comparison_reasoning: string;
+};
+
+export type ResearchFIRAnalysis = {
+  improved_draft: string;
+  suggested_sections: string;
+  risk_analysis: string;
+};
+
+export type ResearchResponse = {
+  status: string;
+  mode: "case_search" | "fir_analysis";
+  results: ResearchCaseResult[];
+  fir_analysis: ResearchFIRAnalysis;
+  message?: string | null;
+  summary?: string | null;
+  hits: any[];
+};
+
+export type ContractAnalysisClause = {
+  clause_name: string;
+  summary: string;
+  risk_level: string;
+  issue: string;
+  suggestion: string;
+  improved_clause: string;
+};
+
+export type ContractAnalysisResponse = {
+  contract_type: string;
+  parties: string[];
+  risk_score: number;
+  risk_level: string;
+  key_risks: string[];
+  missing_clauses: string[];
+  clauses: ContractAnalysisClause[];
+  negotiation_insights: string[];
+  final_summary: string;
+  summary?: string | null;
+};
+
 // Auth
 export const authRegister = (data: {
   email: string;
@@ -408,17 +508,17 @@ export const chatQuery = (
 ) => post<any>("/chat/query", { question, language, history });
 
 // Case Analysis
-export const analyzeCase = (data: any) => post<any>("/analysis/case", data);
+export const analyzeCase = (data: any) => post<CaseAnalysisResponse>("/analysis/case", data);
 
 // Research
-export const searchResearch = (data: any) => post<any>("/research/search", data);
+export const searchResearch = (data: any) => post<ResearchResponse>("/research/search", data);
 
 // Document Drafting
 export const draftDocument = (data: any) => post<any>("/analysis/draft", data);
 
 // Contract Analysis
 export const analyzeContract = (formData: FormData) =>
-  postForm<any>("/documents/contract/analyze", formData);
+  postForm<ContractAnalysisResponse>("/documents/contract/analyze", formData);
 
 // Evidence Analysis
 export const analyzeEvidence = (formData: FormData) =>
@@ -457,7 +557,7 @@ export async function downloadFirDocumentPdf(firId: string, documentKind: string
 }
 
 // Case Strength
-export const predictStrength = (data: any) => post<any>("/analysis/strength", data);
+export const predictStrength = (data: any) => post<CaseStrengthResponse>("/analysis/strength", data);
 
 export const getLawyers = (params?: {
   query?: string;
