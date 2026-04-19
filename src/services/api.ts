@@ -29,9 +29,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
         const json = await res.json();
         const detail = json?.detail || "";
         if (path === "/auth/login") {
-          throw new Error(
-            "Invalid email or password. If you created your account before the latest backend redeploy, register again.",
-          );
+          throw new Error(detail || "Invalid email or password.");
         }
         if (path === "/auth/me" || path === "/auth/logout") {
           throw new Error("Your session has expired. Please sign in again.");
