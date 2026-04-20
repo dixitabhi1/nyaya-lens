@@ -8,9 +8,11 @@ import {
 } from "react";
 import { authLogin, authLogout, authMe, authRegister } from "@/services/api";
 import {
+  AUTH_EXPIRED_EVENT,
   clearAuthSession,
   getAuthToken,
   getStoredAuthUser,
+  notifyAuthExpired,
   persistAuthSession,
   type AuthUser,
 } from "@/lib/auth-storage";
@@ -71,6 +73,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, [token]);
 
+  useEffect(() => {
+    function handleAuthExpired() {
+      clearAuthSession();
+      setToken(null);
+      setUser(null);
+      setIsLoading(false);
+    }
+
+    window.addEventListener(AUTH_EXPIRED_EVENT, handleAuthExpired);
+    return () => {
+      window.removeEventListener(AUTH_EXPIRED_EVENT, handleAuthExpired);
+    };
+  }, []);
+
   async function login(email: string, password: string) {
     const response = await authLogin({ email, password });
     persistAuthSession(response.access_token, response.user);
@@ -100,9 +116,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await authLogout();
       }
     } finally {
-      clearAuthSession();
-      setToken(null);
-      setUser(null);
+      notifyAuthExpired();
     }
   }
 

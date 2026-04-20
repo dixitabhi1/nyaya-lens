@@ -1,5 +1,6 @@
 export const AUTH_TOKEN_KEY = "nyayasetu_auth_token";
 export const AUTH_USER_KEY = "nyayasetu_auth_user";
+export const AUTH_EXPIRED_EVENT = "nyayasetu:auth-expired";
 
 export type AuthUser = {
   id: string;
@@ -43,4 +44,8 @@ export function persistAuthSession(token: string, user: AuthUser): void {
 export function clearAuthSession(): void {
   localStorage.removeItem(AUTH_TOKEN_KEY);
   localStorage.removeItem(AUTH_USER_KEY);
+}
+
+export function notifyAuthExpired(): void {
+  window.dispatchEvent(new CustomEvent(AUTH_EXPIRED_EVENT));
 }

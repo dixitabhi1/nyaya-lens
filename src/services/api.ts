@@ -1,4 +1,4 @@
-import { getAuthToken } from "@/lib/auth-storage";
+import { clearAuthSession, getAuthToken, notifyAuthExpired } from "@/lib/auth-storage";
 
 const DEFAULT_API_BASE_URL = "https://abhishek785-nyaya-setu.hf.space/api/v1";
 const RAW_BASE_URL = import.meta.env.VITE_API_BASE_URL || DEFAULT_API_BASE_URL;
@@ -25,6 +25,21 @@ function timeoutMessageFor(path: string): string {
     return "NyayaSetu is taking too long to respond. Please try signing in again shortly.";
   }
   return "NyayaSetu is taking too long to respond. Please try again shortly.";
+}
+
+function handleUnauthorized(path: string, detail: string): never {
+  if (path !== "/auth/login" && path !== "/auth/register") {
+    clearAuthSession();
+    notifyAuthExpired();
+  }
+
+  if (path === "/auth/login") {
+    throw new Error(detail || "Invalid email or password.");
+  }
+  if (path === "/auth/me" || path === "/auth/logout") {
+    throw new Error("Your session has expired. Please sign in again.");
+  }
+  throw new Error(detail || "Your session has expired. Please sign in again.");
 }
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
@@ -57,16 +72,10 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
       try {
         const json = await res.json();
         const detail = json?.detail || "";
-        if (path === "/auth/login") {
-          throw new Error(detail || "Invalid email or password.");
-        }
-        if (path === "/auth/me" || path === "/auth/logout") {
-          throw new Error("Your session has expired. Please sign in again.");
-        }
-        throw new Error(detail || "Authentication failed. Please sign in again.");
+        handleUnauthorized(path, detail);
       } catch (e: any) {
         if (e instanceof Error) throw e;
-        throw new Error("Authentication failed. Please sign in again.");
+        handleUnauthorized(path, "");
       }
     }
     if (res.status === 422) {
