@@ -34,7 +34,13 @@ export function UserHistoryPanel({ category, title, onSelect }: Props) {
       const data = await getHistory(category, 8);
       setItems(data?.items || []);
     } catch (e: any) {
-      setError(e.message || "Unable to load history.");
+      const message = e?.message || "Unable to load history.";
+      if (/api error 500|internal server error/i.test(message)) {
+        setItems([]);
+        setError("");
+      } else {
+        setError(message);
+      }
     } finally {
       setLoading(false);
     }
