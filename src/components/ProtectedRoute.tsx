@@ -60,7 +60,7 @@ export function ProtectedRoute({
             </Button>
             {requiredAccess === "judge" ? (
               <Button asChild>
-                <Link to="/judges/join">Create judge profile</Link>
+                <Link to="/register">Request judge access</Link>
               </Button>
             ) : null}
           </div>

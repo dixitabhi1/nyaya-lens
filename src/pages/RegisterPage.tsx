@@ -14,11 +14,11 @@ const roleOptions = [
   {
     value: "citizen",
     title: "Citizen",
-    description: "Get immediate access to legal help, saved FIR drafts, and judge portal discovery.",
+    description: "Get immediate access to legal help, saved FIR drafts, and AI workflows.",
     icon: UserRound,
   },
   {
-    value: "judge",
+    value: "lawyer",
     title: "Judge",
     description: "Request judicial access for the judge dashboard, case review, and verified court workflows.",
     icon: Gavel,
@@ -158,23 +158,23 @@ export default function RegisterPage() {
             {role !== "citizen" ? (
               <>
                 <div className="space-y-2">
-                  <Label htmlFor="professionalId">{role === "judge" ? "Judicial Service ID" : "Badge / Employee ID"}</Label>
+                  <Label htmlFor="professionalId">{role === "lawyer" ? "Judicial Service ID" : "Badge / Employee ID"}</Label>
                   <Input
                     id="professionalId"
                     value={professionalId}
                     onChange={(e) => setProfessionalId(e.target.value)}
-                    placeholder={role === "judge" ? "JS/1234/2016" : "Police badge or employee ID"}
+                    placeholder={role === "lawyer" ? "JS/1234/2016" : "Police badge or employee ID"}
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="organization">{role === "judge" ? "Court / Bench / Registry" : "Police Station / Unit"}</Label>
+                  <Label htmlFor="organization">{role === "lawyer" ? "Court / Bench / Registry" : "Police Station / Unit"}</Label>
                   <Textarea
                     id="organization"
                     rows={3}
                     value={organization}
                     onChange={(e) => setOrganization(e.target.value)}
-                    placeholder={role === "judge" ? "Delhi High Court, Criminal Bench..." : "Hazratganj Police Station, Cyber Cell..."}
+                    placeholder={role === "lawyer" ? "Delhi High Court, Criminal Bench..." : "Hazratganj Police Station, Cyber Cell..."}
                   />
                 </div>
               </>
@@ -189,7 +189,7 @@ export default function RegisterPage() {
               <AlertDescription>
                 {role === "citizen"
                   ? "Citizen accounts are approved immediately."
-                  : `${role === "judge" ? "Judge" : "Police"} accounts stay active as citizen accounts until an admin approves the requested professional role.`}
+                  : `${role === "lawyer" ? "Judge" : "Police"} accounts stay active as citizen accounts until an admin approves the requested professional role.`}
               </AlertDescription>
             </Alert>
             <Button type="submit" className="w-full" disabled={submitting}>

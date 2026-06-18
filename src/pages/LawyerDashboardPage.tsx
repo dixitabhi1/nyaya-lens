@@ -47,7 +47,7 @@ export default function LawyerDashboardPage() {
               <p className="font-display text-4xl font-bold text-slate-950">Judge dashboard unavailable</p>
               <p className="text-base text-slate-600">{error}</p>
               <Button asChild className="rounded-full bg-slate-950 text-amber-50 hover:bg-slate-900">
-                <Link to="/judges/join">Create or link judge profile</Link>
+                <Link to="/register">Request judge access</Link>
               </Button>
             </CardContent>
           </Card>
@@ -88,10 +88,10 @@ export default function LawyerDashboardPage() {
               </p>
               <div className="flex flex-wrap gap-3">
                 <Button asChild className="rounded-full bg-amber-300 text-slate-950 hover:bg-amber-200">
-                  <Link to="/judges">Open judge portal</Link>
+                  <Link to="/dashboard">Open workspace</Link>
                 </Button>
                 <Button asChild variant="outline" className="rounded-full border-white/20 bg-white/5 text-white hover:bg-white/10">
-                  <Link to="/judges/join">Update judge profile</Link>
+                  <Link to="/register">Request judge access</Link>
                 </Button>
               </div>
             </CardContent>
@@ -177,7 +177,7 @@ export default function LawyerDashboardPage() {
                   </div>
                 )) : (
                   <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm leading-7 text-slate-600">
-                    Published judge portal insights will appear here once available.
+                    Published judicial insights will appear here once available.
                   </div>
                 )}
               </div>

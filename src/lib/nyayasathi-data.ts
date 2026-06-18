@@ -45,7 +45,7 @@ export type LawyerFeedPost = {
 export const landingMetrics = [
   { label: "AI complaint workflows", value: "FIR + OCR + RAG" },
   { label: "For institutions", value: "Police-ready dashboard" },
-  { label: "Judicial layer", value: "Verified judge portal" },
+  { label: "Judicial layer", value: "Role-based judge access" },
 ];
 
 export const featureCards: FeatureCard[] = [
@@ -258,9 +258,9 @@ export const dashboardCards = [
     href: "/case-analysis",
   },
   {
-    title: "Judge Portal",
-    description: "Discover verified judge profiles by subject area, city, service record, and court lane.",
-    href: "/judges",
+    title: "Document Drafting",
+    description: "Use approved templates and AI assistance to prepare legal documents faster.",
+    href: "/drafting",
   },
   {
     title: "Judge Dashboard",

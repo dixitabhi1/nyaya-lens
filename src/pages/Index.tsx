@@ -13,7 +13,6 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,7 +20,6 @@ import { BrandMark } from "@/components/BrandMark";
 import { useAuth } from "@/lib/auth-context";
 import {
   citizenAssistantHighlights,
-  fallbackLawyerDirectoryResponse,
   fallbackLawyerNetworkFeedResponse,
   fallbackPoliceDashboardResponse,
   featureCards,
@@ -29,10 +27,8 @@ import {
 } from "@/lib/nyayasathi-data";
 import {
   getLawyerNetworkFeed,
-  getLawyers,
   getPoliceDashboard,
   type LawyerNetworkPost,
-  type LawyerSummary,
   type PoliceDashboardCard,
 } from "@/services/api";
 
@@ -45,18 +41,8 @@ const featureIcons = {
   knowledge: BookOpenText,
 };
 
-function initials(name: string) {
-  return name
-    .split(" ")
-    .slice(0, 2)
-    .map((part) => part[0])
-    .join("")
-    .toUpperCase();
-}
-
 const Index = () => {
   const { isAuthenticated, user } = useAuth();
-  const [lawyers, setLawyers] = useState<LawyerSummary[]>(fallbackLawyerDirectoryResponse.lawyers);
   const [posts, setPosts] = useState<LawyerNetworkPost[]>(fallbackLawyerNetworkFeedResponse.posts);
   const [policeCards, setPoliceCards] = useState<PoliceDashboardCard[]>(fallbackPoliceDashboardResponse.cards);
   const [usingFallback, setUsingFallback] = useState(false);
@@ -65,8 +51,7 @@ const Index = () => {
     let active = true;
 
     async function loadLandingData() {
-      const [directory, feed, police] = await Promise.allSettled([
-        getLawyers({ limit: 3 }),
+      const [feed, police] = await Promise.allSettled([
         getLawyerNetworkFeed(3),
         user?.can_access_police_dashboard ? getPoliceDashboard(4) : Promise.resolve(null),
       ]);
@@ -74,13 +59,6 @@ const Index = () => {
         return;
       }
       let usedFallback = false;
-
-      if (directory.status === "fulfilled" && Array.isArray(directory.value.lawyers)) {
-        setLawyers(directory.value.lawyers);
-      } else {
-        setLawyers(fallbackLawyerDirectoryResponse.lawyers);
-        usedFallback = true;
-      }
 
       if (feed.status === "fulfilled" && Array.isArray(feed.value.posts)) {
         setPosts(feed.value.posts);
@@ -119,7 +97,6 @@ const Index = () => {
 
           <div className="hidden items-center gap-6 text-sm font-medium text-slate-600 lg:flex">
             <a href="#features" className="transition-colors hover:text-slate-950">Features</a>
-            <a href="#judges" className="transition-colors hover:text-slate-950">Judge Portal</a>
             <a href="#insights" className="transition-colors hover:text-slate-950">Judicial Insights</a>
             <a href="#police" className="transition-colors hover:text-slate-950">Police Dashboard</a>
           </div>
@@ -140,7 +117,7 @@ const Index = () => {
       <main>
         {usingFallback ? (
           <div className="mx-auto max-w-7xl px-4 pt-6 text-sm text-amber-700 sm:px-6 lg:px-8">
-            Some live judge portal and operations previews are temporarily unavailable. Showing bundled preview data.
+            Some live judicial workflow and operations previews are temporarily unavailable. Showing bundled preview data.
           </div>
         ) : null}
 
@@ -154,7 +131,7 @@ const Index = () => {
                 NyayaSathi - AI Powered Legal Bridge for Citizens, Police and Judges
               </h1>
               <p className="max-w-2xl text-lg leading-8 text-slate-600 sm:text-xl">
-                File complaints, analyze legal cases, route work through verified judge portals, and understand the law - all in one intelligent platform.
+                File complaints, analyze legal cases, request role-based judicial access, and understand the law - all in one intelligent platform.
               </p>
             </div>
 
@@ -166,7 +143,7 @@ const Index = () => {
                 <Link to="/case-analysis">Analyze My Case</Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="rounded-full border-amber-300 bg-amber-50 px-7 text-slate-900 hover:bg-amber-100">
-                <Link to="/judges">Open Judge Portal</Link>
+                <Link to="/register">Request Judge Access</Link>
               </Button>
             </div>
 
@@ -278,18 +255,18 @@ const Index = () => {
           </div>
         </section>
 
-        <section id="judges" className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-16">
+        <section id="judicial-access" className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-16">
           <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
             <div className="space-y-6">
               <div className="space-y-3">
                 <Badge variant="outline" className="rounded-full border-slate-300 bg-white/80 px-4 py-1 text-[11px] uppercase tracking-[0.28em] text-slate-600">
-                  Judge Portal
+                  Judge access
                 </Badge>
                 <h2 className="font-display text-4xl font-bold tracking-tight text-slate-950 sm:text-5xl">
-                  Discover verified judges by subject area, city, service record, and court lane.
+                  Request verified judicial access through the standard approval workflow.
                 </h2>
                 <p className="max-w-2xl text-base leading-7 text-slate-600">
-                  NyayaSathi combines judicial profile discovery with identity, handles, and role-based access so court workflows can move faster.
+                  NyayaSathi keeps judge access behind account review. Applicants submit their judicial service ID, court details, city, and language preferences for admin approval.
                 </p>
               </div>
 
@@ -297,47 +274,25 @@ const Index = () => {
                 <div className="flex flex-col gap-3 lg:flex-row">
                   <div className="flex flex-1 items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-4 text-slate-500">
                     <Search className="h-5 w-5" />
-                    <span>Search by subject area, city, years of service, or court lane</span>
+                    <span>Use registration to request judge dashboard access</span>
                   </div>
                   <Button asChild className="h-auto rounded-2xl bg-slate-950 px-6 py-4 text-amber-50 hover:bg-slate-900">
-                    <Link to="/judges">Browse Judges</Link>
+                    <Link to="/register">Create Account</Link>
                   </Button>
                 </div>
               </div>
 
-              <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-                {lawyers.map((lawyer) => (
-                  <Card key={lawyer.handle} className="rounded-[28px] border-slate-200 bg-white/85 shadow-xl shadow-slate-200/60">
-                    <CardContent className="space-y-5 p-6">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex items-center gap-4">
-                          <Avatar className="h-14 w-14 border border-slate-200">
-                            <AvatarFallback className="bg-slate-950 text-base font-semibold text-amber-50">
-                              {initials(lawyer.name)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="text-lg font-semibold text-slate-950">{lawyer.name}</p>
-                            <p className="text-sm text-slate-500">@{lawyer.handle}</p>
-                          </div>
-                        </div>
-                        <Badge className={lawyer.verified ? "rounded-full bg-emerald-100 text-emerald-700 hover:bg-emerald-100" : "rounded-full bg-amber-100 text-amber-800 hover:bg-amber-100"}>
-                          {lawyer.verified ? "Verified" : lawyer.verification_status}
-                        </Badge>
-                      </div>
-                      <div className="space-y-2 text-sm text-slate-600">
-                        <p className="font-medium text-slate-900">{lawyer.specialization}</p>
-                        <p>{lawyer.courts}</p>
-                        <p>{lawyer.experience} experience</p>
-                        <p>{lawyer.city}</p>
-                      </div>
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="font-semibold text-slate-950">Rating {lawyer.rating.toFixed(1)}</span>
-                        <span className="text-slate-500">{lawyer.fee}</span>
-                      </div>
-                      <Button asChild className="w-full rounded-full bg-slate-950 text-amber-50 hover:bg-slate-900">
-                        <Link to={`/judge/${lawyer.handle}`}>View Judge Profile</Link>
-                      </Button>
+              <div className="grid gap-5 md:grid-cols-3">
+                {[
+                  ["Create account", "Choose Judge on the registration form and submit judicial service details."],
+                  ["Admin review", "Court, bench, city, and ID details remain pending until an admin approves them."],
+                  ["Dashboard access", "Approved accounts unlock the protected Judge Dashboard from the workspace."],
+                ].map(([title, detail]) => (
+                  <Card key={title} className="rounded-[28px] border-slate-200 bg-white/85 shadow-xl shadow-slate-200/60">
+                    <CardContent className="space-y-4 p-6">
+                      <Badge className="rounded-full bg-slate-100 text-slate-700 hover:bg-slate-100">Approval step</Badge>
+                      <p className="text-xl font-semibold text-slate-950">{title}</p>
+                      <p className="text-sm leading-7 text-slate-600">{detail}</p>
                     </CardContent>
                   </Card>
                 ))}
@@ -362,7 +317,7 @@ const Index = () => {
                     <p>@justice_ananya</p>
                   </div>
                   <p className="text-sm leading-7 text-slate-300">
-                    Handles power search, public profile URLs, and trusted role-based visibility across the NyayaSathi judge portal.
+                    Judicial access remains role-gated. Approved accounts can use the protected judge dashboard without a public directory.
                   </p>
                 </CardContent>
               </Card>
@@ -375,7 +330,7 @@ const Index = () => {
                     Judges can submit judicial service ID, court details, languages, city, review lane, bio, and photo to create a verified profile.
                   </p>
                   <Button asChild className="w-full rounded-full bg-slate-950 text-amber-50 hover:bg-slate-900">
-                    <Link to="/judges/join">Join as Judge</Link>
+                    <Link to="/register">Request Judge Access</Link>
                   </Button>
                 </CardContent>
               </Card>
@@ -397,7 +352,7 @@ const Index = () => {
                   Verified judicial profiles can publish procedural explainers, judgment notes, and court-ready operational insights.
                 </p>
                 <Button asChild variant="outline" className="w-full rounded-full border-slate-300 bg-white hover:bg-slate-100">
-                  <Link to="/judges">Open Judge Portal</Link>
+                  <Link to="/register">Request Judge Access</Link>
                 </Button>
               </CardContent>
             </Card>
@@ -419,8 +374,8 @@ const Index = () => {
                     <p className="text-sm leading-7 text-slate-600">{post.excerpt}</p>
                     <div className="flex items-center justify-between text-sm text-slate-500">
                       <span>{post.stats}</span>
-                      <Link to={`/judge/${post.handle}`} className="font-semibold text-slate-900 hover:text-slate-700">
-                        View judge
+                      <Link to="/register" className="font-semibold text-slate-900 hover:text-slate-700">
+                        Request access
                       </Link>
                     </div>
                   </CardContent>
@@ -495,7 +450,7 @@ const Index = () => {
                   Build justice infrastructure that connects citizens, police, and judges.
                 </h2>
                 <p className="max-w-3xl text-base leading-8 text-slate-300">
-                  NyayaSathi brings together AI legal assistance, complaint drafting, judge portals, judicial insights, and police workflows in one modern legal-tech platform.
+                  NyayaSathi brings together AI legal assistance, complaint drafting, role-based judge access, judicial insights, and police workflows in one modern legal-tech platform.
                 </p>
               </div>
               <div className="flex flex-wrap gap-3 lg:flex-col">
@@ -505,7 +460,7 @@ const Index = () => {
                   </Link>
                 </Button>
                 <Button asChild size="lg" variant="outline" className="rounded-full border-white/20 bg-white/5 px-7 text-white hover:bg-white/10">
-                  <Link to="/judges">Explore judges</Link>
+                  <Link to="/register">Request judge access</Link>
                 </Button>
               </div>
             </CardContent>

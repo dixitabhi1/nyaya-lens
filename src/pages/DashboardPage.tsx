@@ -6,25 +6,18 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/lib/auth-context";
-import { mergeLawyerDirectoryWithCache } from "@/lib/lawyer-cache";
 import {
   dashboardCards,
-  fallbackLawyerDirectoryResponse,
   fallbackPoliceDashboardResponse,
   quickPrompts,
 } from "@/lib/nyayasathi-data";
 import {
-  getLawyers,
   getPoliceDashboard,
-  type LawyerSummary,
   type PoliceDashboardCard,
 } from "@/services/api";
 
 export default function DashboardPage() {
   const { user } = useAuth();
-  const [lawyers, setLawyers] = useState<LawyerSummary[]>(
-    mergeLawyerDirectoryWithCache(fallbackLawyerDirectoryResponse).lawyers,
-  );
   const [policeCards, setPoliceCards] = useState<PoliceDashboardCard[]>(fallbackPoliceDashboardResponse.cards);
   const [usingFallback, setUsingFallback] = useState(false);
 
@@ -32,21 +25,16 @@ export default function DashboardPage() {
     let active = true;
 
     async function loadSidebarData() {
-      const [directory, police] = await Promise.allSettled([
-        getLawyers({ limit: 3 }),
-        user?.can_access_police_dashboard ? getPoliceDashboard(3) : Promise.resolve(null),
-      ]);
+      const police = await Promise.resolve(
+        user?.can_access_police_dashboard ? getPoliceDashboard(3) : null,
+      ).then(
+        (value) => ({ status: "fulfilled" as const, value }),
+        (reason) => ({ status: "rejected" as const, reason }),
+      );
       if (!active) {
         return;
       }
       let usedFallback = false;
-
-      if (directory.status === "fulfilled") {
-        setLawyers(mergeLawyerDirectoryWithCache(directory.value).lawyers);
-      } else {
-        setLawyers(mergeLawyerDirectoryWithCache(fallbackLawyerDirectoryResponse).lawyers);
-        usedFallback = true;
-      }
 
       if (police.status === "fulfilled" && police.value) {
         setPoliceCards(police.value.cards);
@@ -179,16 +167,13 @@ export default function DashboardPage() {
 
             <Card className="rounded-[30px] border-slate-200 bg-slate-950 text-slate-50 shadow-xl shadow-slate-900/15">
               <CardContent className="space-y-5 p-6">
-                <p className="text-xs uppercase tracking-[0.28em] text-slate-400">Featured judges</p>
-                {lawyers.map((lawyer) => (
-                  <Link key={lawyer.handle} to={`/judge/${lawyer.handle}`} className="block rounded-2xl border border-white/10 bg-white/5 px-4 py-4 transition hover:bg-white/10">
-                    <p className="font-semibold">{lawyer.name}</p>
-                    <p className="mt-1 text-sm text-slate-300">@{lawyer.handle} - {lawyer.specialization}</p>
-                    <p className="mt-2 text-xs uppercase tracking-[0.22em] text-slate-400">{lawyer.city}</p>
-                  </Link>
-                ))}
+                <p className="text-xs uppercase tracking-[0.28em] text-slate-400">Judicial access</p>
+                <p className="text-2xl font-semibold">Approved judge accounts unlock the role-based dashboard.</p>
+                <p className="text-sm leading-7 text-slate-300">
+                  Request access during account creation. The admin panel reviews the submitted judicial service ID, court, bench, and city details before activating the professional workspace.
+                </p>
                 <Button asChild variant="outline" className="w-full rounded-full border-white/20 bg-white/5 text-white hover:bg-white/10">
-                  <Link to="/judges">Browse verified judges</Link>
+                  <Link to="/register">Request judge access</Link>
                 </Button>
               </CardContent>
             </Card>

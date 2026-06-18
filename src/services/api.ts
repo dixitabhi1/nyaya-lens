@@ -11,14 +11,14 @@ function requestTimeoutMsFor(path: string): number {
   if (path.startsWith("/auth/")) {
     return 12000;
   }
-  if (path === "/judges/register") {
+  if (path === "/lawyers/register") {
     return 18000;
   }
   return DEFAULT_REQUEST_TIMEOUT_MS;
 }
 
 function timeoutMessageFor(path: string): string {
-  if (path === "/judges/register") {
+  if (path === "/lawyers/register") {
     return "Judge profile submission is taking too long. Please try again in a few moments.";
   }
   if (path.startsWith("/auth/")) {
@@ -642,7 +642,7 @@ export const getLawyers = (params?: {
   if (typeof params?.verifiedOnly === "boolean") search.set("verified_only", String(params.verifiedOnly));
   if (typeof params?.limit === "number") search.set("limit", String(params.limit));
   const suffix = search.toString() ? `?${search.toString()}` : "";
-  return get<RawLawyerDirectoryResponse>(`/judges${suffix}`).then((data) => {
+  return get<RawLawyerDirectoryResponse>(`/lawyers${suffix}`).then((data) => {
     const lawyers = data.lawyers ?? data.judges ?? [];
     const verifiedPercentage =
       typeof data.verified_percentage === "number"
@@ -666,33 +666,33 @@ export const getLawyers = (params?: {
 };
 
 export const getLawyerProfile = (handle: string) =>
-  get<LawyerDetail>(`/judges/${encodeURIComponent(handle.replace(/^@/, ""))}`);
+  get<LawyerDetail>(`/lawyers/${encodeURIComponent(handle.replace(/^@/, ""))}`);
 
 export const getLawyerNetworkFeed = (limit = 20) =>
-  get<RawLawyerNetworkFeedResponse>(`/judges/network/feed?limit=${limit}`).then((data) => ({
+  get<RawLawyerNetworkFeedResponse>(`/lawyers/network/feed?limit=${limit}`).then((data) => ({
     posts: Array.isArray(data.posts) ? data.posts : [],
   }));
 
 export const registerLawyerProfile = (data: LawyerRegistrationPayload) =>
-  post<LawyerRegistrationResponse>("/judges/register", data);
+  post<LawyerRegistrationResponse>("/lawyers/register", data);
 
 export const getPoliceDashboard = (limit = 8) =>
-  get<PoliceDashboardResponse>(`/judges/police/dashboard?limit=${limit}`);
+  get<PoliceDashboardResponse>(`/lawyers/police/dashboard?limit=${limit}`);
 
 export const getLawyerFollowers = (handle: string, limit = 50) =>
-  get<LawyerFollowersResponse>(`/judges/${encodeURIComponent(handle.replace(/^@/, ""))}/followers?limit=${limit}`);
+  get<LawyerFollowersResponse>(`/lawyers/${encodeURIComponent(handle.replace(/^@/, ""))}/followers?limit=${limit}`);
 
 export const toggleLawyerFollow = (handle: string) =>
-  post<LawyerFollowToggleResponse>(`/judges/${encodeURIComponent(handle.replace(/^@/, ""))}/follow`, {});
+  post<LawyerFollowToggleResponse>(`/lawyers/${encodeURIComponent(handle.replace(/^@/, ""))}/follow`, {});
 
 export const toggleLawyerPostLike = (postId: number) =>
-  post<LawyerPostLikeToggleResponse>(`/judges/network/posts/${postId}/like`, {});
+  post<LawyerPostLikeToggleResponse>(`/lawyers/network/posts/${postId}/like`, {});
 
 export const createLawyerNetworkPost = (data: LawyerPostCreatePayload) =>
-  post<LawyerNetworkPostResponse>("/judges/network/posts", data);
+  post<LawyerNetworkPostResponse>("/lawyers/network/posts", data);
 
 export const getLawyerDashboard = () =>
-  get<LawyerDashboardResponse>("/judges/dashboard/me");
+  get<LawyerDashboardResponse>("/lawyers/dashboard/me");
 
 export const getAdminDashboard = (limit = 12) =>
   get<AdminDashboardResponse>(`/admin/dashboard?limit=${limit}`);

@@ -22,9 +22,6 @@ const StrengthPage = lazy(() => import("./pages/StrengthPage"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
 const RegisterPage = lazy(() => import("./pages/RegisterPage"));
 const DashboardPage = lazy(() => import("./pages/DashboardPage"));
-const JudgesPage = lazy(() => import("./pages/LawyersPage"));
-const JudgeRegisterPage = lazy(() => import("./pages/LawyerRegisterPage"));
-const JudgeProfilePage = lazy(() => import("./pages/LawyerProfilePage"));
 const JudgeDashboardPage = lazy(() => import("./pages/LawyerDashboardPage"));
 const PoliceDashboardPage = lazy(() => import("./pages/PoliceDashboardPage"));
 const AdminDashboardPage = lazy(() => import("./pages/AdminDashboardPage"));
@@ -52,9 +49,6 @@ const App = () => (
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/dashboard" element={<AppLayout><DashboardPage /></AppLayout>} />
-              <Route path="/judges" element={<AppLayout><JudgesPage /></AppLayout>} />
-              <Route path="/judges/join" element={<AppLayout><JudgeRegisterPage /></AppLayout>} />
-              <Route path="/judge/:handle" element={<AppLayout><JudgeProfilePage /></AppLayout>} />
               <Route
                 path="/judge-dashboard"
                 element={<ProtectedRoute requiredAccess="judge"><AppLayout><JudgeDashboardPage /></AppLayout></ProtectedRoute>}
