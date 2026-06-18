@@ -317,7 +317,7 @@ export default function MessagesPage() {
                 )
               ) : (
                 <div className="rounded-[24px] border border-dashed border-slate-300 bg-slate-50 px-5 py-6 text-sm leading-7 text-slate-600">
-                  NyayaSetu direct messages are live. Search for a citizen, police user, or lawyer to start a private conversation.
+                  NyayaSathi direct messages are live. Search for a citizen, police user, or lawyer to start a private conversation.
                 </div>
               )}
             </div>

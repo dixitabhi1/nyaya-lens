@@ -1,6 +1,6 @@
 import type { LawyerDetail, LawyerDirectoryResponse, LawyerSummary } from "@/services/api";
 
-const LAWYER_CACHE_KEY = "nyayasetu_lawyer_profile_cache";
+const LAWYER_CACHE_KEY = "nyayasathi_lawyer_profile_cache";
 
 type LawyerCacheRecord = Record<string, LawyerDetail>;
 

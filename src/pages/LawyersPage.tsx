@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { mergeLawyerDirectoryWithCache } from "@/lib/lawyer-cache";
-import { fallbackLawyerDirectoryResponse, fallbackLawyerSummaries } from "@/lib/nyayasetu-data";
+import { fallbackLawyerDirectoryResponse, fallbackLawyerSummaries } from "@/lib/nyayasathi-data";
 import { getLawyers, type LawyerDirectoryResponse } from "@/services/api";
 
 function initials(name: string) {
@@ -100,13 +100,13 @@ export default function LawyersPage() {
       <div className="mx-auto max-w-7xl space-y-8">
         <section className="space-y-4 text-center">
           <Badge variant="outline" className="rounded-full border-slate-300 bg-white px-4 py-1 text-[11px] uppercase tracking-[0.28em] text-slate-600">
-            Verified legal professionals
+            Verified judicial professionals
           </Badge>
           <h1 className="font-display text-5xl font-bold tracking-tight text-slate-950 sm:text-6xl">
-            Find Your Legal Expert
+            Judge Portal
           </h1>
           <p className="mx-auto max-w-3xl text-lg leading-8 text-slate-600">
-            Browse verified lawyers, view their handles and profiles, compare practice areas, and book consultations.
+            Browse verified judges, view court profiles, compare subject areas, and open role-based judicial workspaces.
           </p>
         </section>
 
@@ -129,14 +129,14 @@ export default function LawyersPage() {
 
             {usingFallback ? (
               <p className="text-sm text-amber-700">
-                Live lawyer data is temporarily unavailable. Showing locally bundled preview profiles.
+                Live judge data is temporarily unavailable. Showing locally bundled preview profiles.
               </p>
             ) : null}
 
             <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-slate-600">
               <div className="flex items-center gap-2">
                 <Users className="h-4 w-4" />
-                <span>{directory.total_lawyers} lawyers</span>
+                <span>{directory.total_lawyers} judges</span>
               </div>
               <div className="flex items-center gap-2">
                 <Star className="h-4 w-4 text-amber-500" />
@@ -178,7 +178,7 @@ export default function LawyersPage() {
                     <p>{lawyer.experience} experience</p>
                     <p>{lawyer.city}</p>
                     <p>{lawyer.languages.join(", ")}</p>
-                    <p>{lawyer.follower_count} followers</p>
+                    <p>{lawyer.follower_count} profile watchers</p>
                   </div>
 
                   <div className="flex items-center justify-between border-t border-slate-100 pt-4 text-sm">
@@ -188,10 +188,7 @@ export default function LawyersPage() {
 
                   <div className="flex gap-3">
                     <Button asChild className="flex-1 rounded-full bg-slate-950 text-amber-50 hover:bg-slate-900">
-                      <Link to={`/lawyer/${lawyer.handle}`}>View Profile</Link>
-                    </Button>
-                    <Button asChild variant="outline" className="flex-1 rounded-full border-slate-300 bg-white hover:bg-slate-50">
-                      <Link to={`/lawyer/${lawyer.handle}`}>Consult</Link>
+                      <Link to={`/judge/${lawyer.handle}`}>View Profile</Link>
                     </Button>
                   </div>
                 </CardContent>
@@ -205,13 +202,13 @@ export default function LawyersPage() {
                 <Users className="h-8 w-8" />
               </div>
               <div className="space-y-2">
-                <p className="text-3xl font-semibold text-slate-950">No Lawyers Found</p>
+                <p className="text-3xl font-semibold text-slate-950">No Judges Found</p>
                 <p className="text-base text-slate-600">
-                  Try a broader search or become the first verified lawyer in this niche.
+                  Try a broader search or create the first verified judge profile in this court lane.
                 </p>
               </div>
               <Button asChild className="rounded-full bg-slate-950 text-amber-50 hover:bg-slate-900">
-                <Link to="/lawyers/join">Join as Lawyer</Link>
+                <Link to="/judges/join">Join as Judge</Link>
               </Button>
             </CardContent>
           </Card>

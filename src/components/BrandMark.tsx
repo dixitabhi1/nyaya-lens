@@ -33,7 +33,7 @@ export function BrandMark({
       {showText ? (
         <div>
           <p className={cn("font-display text-xl font-bold leading-none tracking-tight text-slate-950", titleClassName)}>
-            NyayaSetu
+            NyayaSathi
           </p>
           {subtitle ? (
             <p className={cn("text-xs uppercase tracking-[0.32em] text-slate-500", subtitleClassName)}>{subtitle}</p>

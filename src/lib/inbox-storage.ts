@@ -1,6 +1,6 @@
 import type { ConversationSummary, DirectMessage } from "@/services/api";
 
-const INBOX_STORAGE_PREFIX = "nyayasetu_inbox_snapshot";
+const INBOX_STORAGE_PREFIX = "nyayasathi_inbox_snapshot";
 
 export type InboxSnapshot = {
   conversations: ConversationSummary[];

@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import { BadgeCheck, CreditCard, Globe2, ImageIcon, Languages, MapPin, UserRound } from "lucide-react";
+import { BadgeCheck, Gavel, Globe2, ImageIcon, Languages, MapPin, UserRound } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -75,7 +75,7 @@ export default function LawyerRegisterPage() {
         description: response.message,
       });
       upsertCachedLawyerProfile(response.profile);
-      navigate(`/lawyer/${response.profile.handle}`, {
+      navigate(`/judge/${response.profile.handle}`, {
         state: { initialProfile: response.profile },
       });
     } catch (error) {
@@ -100,37 +100,37 @@ export default function LawyerRegisterPage() {
           <CardContent className="space-y-6 p-8">
             <div className="space-y-3">
               <Badge variant="outline" className="rounded-full border-slate-300 bg-slate-50 px-4 py-1 text-[11px] uppercase tracking-[0.28em] text-slate-600">
-                Lawyer self registration
+                Judge self registration
               </Badge>
-              <h1 className="font-display text-5xl font-bold tracking-tight text-slate-950">Create your NyayaSetu lawyer profile</h1>
+              <h1 className="font-display text-5xl font-bold tracking-tight text-slate-950">Create your NyayaSathi judge profile</h1>
               <p className="max-w-3xl text-base leading-7 text-slate-600">
-                Build a verified public profile with a unique handle, practice details, consultation fee, and professional bio for citizen trust and discovery.
+                Build a verified judicial profile with a unique handle, court details, review lane, and professional bio for role-based court workflows.
               </p>
             </div>
 
             <form className="grid gap-5 md:grid-cols-2" onSubmit={handleSubmit}>
               <label className="space-y-2">
                 <span className="text-sm font-medium text-slate-700">Name</span>
-                <Input value={form.name} onChange={(event) => update("name", event.target.value)} placeholder="Advocate Ananya Sharma" required />
+                <Input value={form.name} onChange={(event) => update("name", event.target.value)} placeholder="Justice Ananya Sharma" required />
               </label>
               <label className="space-y-2">
                 <span className="text-sm font-medium text-slate-700">Unique Handle</span>
-                <Input value={form.handle} onChange={(event) => update("handle", event.target.value)} placeholder="@adv_sharma" required />
+                <Input value={form.handle} onChange={(event) => update("handle", event.target.value)} placeholder="@justice_sharma" required />
               </label>
               <label className="space-y-2">
-                <span className="text-sm font-medium text-slate-700">Bar Council ID</span>
-                <Input value={form.barCouncilId} onChange={(event) => update("barCouncilId", event.target.value)} placeholder="D/1234/2016" required />
+                <span className="text-sm font-medium text-slate-700">Judicial Service ID</span>
+                <Input value={form.barCouncilId} onChange={(event) => update("barCouncilId", event.target.value)} placeholder="JS/1234/2016" required />
               </label>
               <label className="space-y-2">
-                <span className="text-sm font-medium text-slate-700">Years of Practice</span>
+                <span className="text-sm font-medium text-slate-700">Years of Service</span>
                 <Input value={form.yearsOfPractice} onChange={(event) => update("yearsOfPractice", event.target.value)} placeholder="8" inputMode="numeric" required />
               </label>
               <label className="space-y-2">
-                <span className="text-sm font-medium text-slate-700">Specialization</span>
+                <span className="text-sm font-medium text-slate-700">Subject Area</span>
                 <Input value={form.specialization} onChange={(event) => update("specialization", event.target.value)} placeholder="Criminal Law, Cyber Crime" required />
               </label>
               <label className="space-y-2">
-                <span className="text-sm font-medium text-slate-700">Courts Practiced In</span>
+                <span className="text-sm font-medium text-slate-700">Courts / Benches</span>
                 <Input value={form.courtsPracticedIn} onChange={(event) => update("courtsPracticedIn", event.target.value)} placeholder="Delhi High Court, Sessions Court" required />
               </label>
               <label className="space-y-2">
@@ -142,8 +142,8 @@ export default function LawyerRegisterPage() {
                 <Input value={form.languages} onChange={(event) => update("languages", event.target.value)} placeholder="English, Hindi" required />
               </label>
               <label className="space-y-2">
-                <span className="text-sm font-medium text-slate-700">Consultation Fee</span>
-                <Input value={form.consultationFee} onChange={(event) => update("consultationFee", event.target.value)} placeholder="INR 2,500" required />
+                <span className="text-sm font-medium text-slate-700">Review Lane</span>
+                <Input value={form.consultationFee} onChange={(event) => update("consultationFee", event.target.value)} placeholder="Criminal motion board" required />
               </label>
               <label className="space-y-2">
                 <span className="text-sm font-medium text-slate-700">Profile Photo URL</span>
@@ -155,7 +155,7 @@ export default function LawyerRegisterPage() {
                   rows={5}
                   value={form.bio}
                   onChange={(event) => update("bio", event.target.value)}
-                  placeholder="Tell citizens about your practice, strengths, and legal approach."
+                  placeholder="Summarize the court role, subject focus, and profile context."
                   required
                 />
               </label>
@@ -165,7 +165,7 @@ export default function LawyerRegisterPage() {
                   rows={4}
                   value={form.about}
                   onChange={(event) => update("about", event.target.value)}
-                  placeholder="Add a fuller professional summary for your public profile."
+                  placeholder="Add a fuller professional summary for the judge portal profile."
                 />
               </label>
               <label className="space-y-2 md:col-span-2">
@@ -174,7 +174,7 @@ export default function LawyerRegisterPage() {
                   rows={4}
                   value={form.caseExperience}
                   onChange={(event) => update("caseExperience", event.target.value)}
-                  placeholder={"One item per line\nLed cyber-fraud complaint strategy\nRepresented clients in Delhi High Court bail matters"}
+                  placeholder={"One item per line\nManaged cyber-fraud complaint review board\nHandled Delhi High Court bail roster matters"}
                 />
               </label>
               <div className="md:col-span-2 flex flex-wrap items-center gap-3">
@@ -195,7 +195,7 @@ export default function LawyerRegisterPage() {
                 <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-4"><UserRound className="h-4 w-4 text-amber-300" /> Public professional profile</div>
                 <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-4"><BadgeCheck className="h-4 w-4 text-amber-300" /> Verification badge</div>
                 <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-4"><Globe2 className="h-4 w-4 text-amber-300" /> Searchable public handle URL</div>
-                <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-4"><CreditCard className="h-4 w-4 text-amber-300" /> Consultation visibility</div>
+                <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-4"><Gavel className="h-4 w-4 text-amber-300" /> Judge dashboard visibility</div>
               </div>
             </CardContent>
           </Card>
@@ -204,7 +204,7 @@ export default function LawyerRegisterPage() {
             <CardContent className="space-y-4 p-6">
               <p className="text-xs uppercase tracking-[0.28em] text-slate-500">Required profile details</p>
               <div className="space-y-3 text-sm text-slate-700">
-                <div className="flex items-center gap-3"><MapPin className="h-4 w-4 text-slate-500" /> City and courts practiced in</div>
+                <div className="flex items-center gap-3"><MapPin className="h-4 w-4 text-slate-500" /> City and courts / benches</div>
                 <div className="flex items-center gap-3"><Languages className="h-4 w-4 text-slate-500" /> Languages supported</div>
                 <div className="flex items-center gap-3"><ImageIcon className="h-4 w-4 text-slate-500" /> Public photo URL and short bio</div>
               </div>

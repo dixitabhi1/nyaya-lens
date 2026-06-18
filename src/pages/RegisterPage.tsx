@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
-import { Briefcase, Landmark, ShieldCheck, UserRound } from "lucide-react";
+import { Gavel, Landmark, ShieldCheck, UserRound } from "lucide-react";
 import { BrandMark } from "@/components/BrandMark";
 import { useAuth } from "@/lib/auth-context";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,14 +14,14 @@ const roleOptions = [
   {
     value: "citizen",
     title: "Citizen",
-    description: "Get immediate access to legal help, saved FIR drafts, and lawyer discovery.",
+    description: "Get immediate access to legal help, saved FIR drafts, and judge portal discovery.",
     icon: UserRound,
   },
   {
-    value: "lawyer",
-    title: "Lawyer",
-    description: "Request professional access for lawyer dashboard, network publishing, and verified profiles.",
-    icon: Briefcase,
+    value: "judge",
+    title: "Judge",
+    description: "Request judicial access for the judge dashboard, case review, and verified court workflows.",
+    icon: Gavel,
   },
   {
     value: "police",
@@ -82,7 +82,7 @@ export default function RegisterPage() {
             <div>
               <CardTitle className="text-2xl">Create account</CardTitle>
               <CardDescription>
-                Choose your role first. Citizen access starts immediately, while lawyer and police access go into the approval queue.
+                Choose your role first. Citizen access starts immediately, while judge and police access go into the approval queue.
               </CardDescription>
             </div>
           </div>
@@ -158,23 +158,23 @@ export default function RegisterPage() {
             {role !== "citizen" ? (
               <>
                 <div className="space-y-2">
-                  <Label htmlFor="professionalId">{role === "lawyer" ? "Bar Council ID" : "Badge / Employee ID"}</Label>
+                  <Label htmlFor="professionalId">{role === "judge" ? "Judicial Service ID" : "Badge / Employee ID"}</Label>
                   <Input
                     id="professionalId"
                     value={professionalId}
                     onChange={(e) => setProfessionalId(e.target.value)}
-                    placeholder={role === "lawyer" ? "D/1234/2016" : "Police badge or employee ID"}
+                    placeholder={role === "judge" ? "JS/1234/2016" : "Police badge or employee ID"}
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="organization">{role === "lawyer" ? "Court / Chamber / Firm" : "Police Station / Unit"}</Label>
+                  <Label htmlFor="organization">{role === "judge" ? "Court / Bench / Registry" : "Police Station / Unit"}</Label>
                   <Textarea
                     id="organization"
                     rows={3}
                     value={organization}
                     onChange={(e) => setOrganization(e.target.value)}
-                    placeholder={role === "lawyer" ? "Delhi High Court, Criminal Bar..." : "Hazratganj Police Station, Cyber Cell..."}
+                    placeholder={role === "judge" ? "Delhi High Court, Criminal Bench..." : "Hazratganj Police Station, Cyber Cell..."}
                   />
                 </div>
               </>
@@ -189,7 +189,7 @@ export default function RegisterPage() {
               <AlertDescription>
                 {role === "citizen"
                   ? "Citizen accounts are approved immediately."
-                  : `${role === "lawyer" ? "Lawyer" : "Police"} accounts stay active as citizen accounts until an admin approves the requested professional role.`}
+                  : `${role === "judge" ? "Judge" : "Police"} accounts stay active as citizen accounts until an admin approves the requested professional role.`}
               </AlertDescription>
             </Alert>
             <Button type="submit" className="w-full" disabled={submitting}>
@@ -210,7 +210,7 @@ export default function RegisterPage() {
             <p className="text-xs uppercase tracking-[0.28em] text-slate-400">How approvals work</p>
             <div className="space-y-3 text-sm text-slate-300">
               <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4">Citizen accounts: immediate access</div>
-              <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4">Lawyer accounts: pending until admin verification</div>
+              <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4">Judge accounts: pending until admin verification</div>
               <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4">Police accounts: pending until admin verification</div>
             </div>
           </CardContent>
@@ -219,7 +219,7 @@ export default function RegisterPage() {
           <CardContent className="space-y-3 p-6">
             <p className="text-xs uppercase tracking-[0.28em] text-slate-500">What happens next</p>
             <p className="text-sm leading-7 text-slate-700">
-              After account creation, NyayaSetu stores your requested role, ID details, organization, and city so the admin panel can review the application with context.
+              After account creation, NyayaSathi stores your requested role, ID details, organization, and city so the admin panel can review the application with context.
             </p>
           </CardContent>
         </Card>

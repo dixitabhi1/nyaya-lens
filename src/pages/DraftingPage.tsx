@@ -123,7 +123,7 @@ export default function DraftingPage() {
   });
   const [uploadFields, setUploadFields] = useState<UploadFieldState[]>([emptyUploadField()]);
 
-  const canUploadTemplates = Boolean(user?.can_access_lawyer_dashboard || user?.can_access_admin_dashboard);
+  const canUploadTemplates = Boolean(user?.can_access_judge_dashboard || user?.can_access_lawyer_dashboard || user?.can_access_admin_dashboard);
 
   const availableDocumentTypes = useMemo(() => {
     const items = new Set<string>();
@@ -253,7 +253,7 @@ export default function DraftingPage() {
                 });
                 toast({
                   title: "Payment successful",
-                  description: "Your lawyer-crafted document is now unlocked.",
+                  description: "Your judge-approved document is now unlocked.",
                 });
                 await loadOrders();
                 resolve();
@@ -292,7 +292,7 @@ export default function DraftingPage() {
 
   function handleDownloadDocument() {
     if (!orderPreview?.generated_document_text) return;
-    const templateSlug = selectedTemplate?.slug || orderPreview.template_slug || "nyayasetu-document";
+    const templateSlug = selectedTemplate?.slug || orderPreview.template_slug || "nyayasathi-document";
     const blob = new Blob([orderPreview.generated_document_text], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -390,16 +390,16 @@ export default function DraftingPage() {
     <div className="mx-auto max-w-7xl space-y-6 p-6">
       <PageHeader
         title="Document Marketplace"
-        description="Browse lawyer-uploaded legal document templates, fill the required details, and unlock the final draft with free or paid checkout."
+        description="Browse judge-approved legal document templates, fill the required details, and unlock the final draft with free or paid checkout."
       />
 
       <Card className="rounded-[30px] border-slate-200 bg-white/95 shadow-xl shadow-slate-200/40">
         <CardContent className="grid gap-4 p-6 lg:grid-cols-[minmax(0,1fr)_repeat(3,minmax(180px,220px))]">
           <div>
             <p className="text-xs uppercase tracking-[0.28em] text-slate-500">Marketplace search</p>
-            <h2 className="mt-2 font-display text-3xl font-bold text-slate-950">Lawyer-crafted templates, not generic AI drafts</h2>
+            <h2 className="mt-2 font-display text-3xl font-bold text-slate-950">Judge-approved templates, not generic AI drafts</h2>
             <p className="mt-3 text-sm leading-7 text-slate-600">
-              Each listing shows the document type, rate, lawyer or admin uploader, and how many buyers have already used it.
+              Each listing shows the document type, rate, judge or admin uploader, and how many users have already used it.
             </p>
           </div>
           <Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search notices, agreements, affidavits..." />
@@ -437,11 +437,11 @@ export default function DraftingPage() {
               </div>
 
               {templatesLoading ? (
-                <LoadingState message="Loading lawyer templates..." />
+                <LoadingState message="Loading judge-approved templates..." />
               ) : templates.length === 0 ? (
                 <EmptyState
                   message="No document templates yet"
-                  sub={canUploadTemplates ? "Publish the first template from the lawyer upload studio." : "No lawyer has published a document template yet."}
+                  sub={canUploadTemplates ? "Publish the first template from the judge upload studio." : "No judge has published a document template yet."}
                 />
               ) : (
                 <div className="grid gap-4 lg:grid-cols-2">
@@ -698,12 +698,12 @@ export default function DraftingPage() {
                 <div className="flex items-center gap-3">
                   <UploadCloud className="h-5 w-5 text-slate-700" />
                   <div>
-                    <p className="text-xs uppercase tracking-[0.28em] text-slate-500">Lawyer upload studio</p>
+                    <p className="text-xs uppercase tracking-[0.28em] text-slate-500">Judge upload studio</p>
                     <h2 className="font-display text-2xl font-bold text-slate-950">Publish a pre-built document</h2>
                   </div>
                 </div>
                 <p className="text-sm leading-7 text-slate-600">
-                  Upload or paste the lawyer-approved template, define the fillable fields, and set a free or paid rate. Use placeholders like <code>{"{{tenant_name}}"}</code> in the template text.
+                  Upload or paste the judge-approved template, define the fillable fields, and set a free or paid rate. Use placeholders like <code>{"{{tenant_name}}"}</code> in the template text.
                 </p>
                 {publishError ? <NoticeBanner variant="error">{publishError}</NoticeBanner> : null}
 

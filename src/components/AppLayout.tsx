@@ -2,7 +2,6 @@ import { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { AppSidebar } from "./AppSidebar";
 import { BrandMark } from "./BrandMark";
-import { InboxNotifications } from "./InboxNotifications";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth-context";
@@ -43,12 +42,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 </div>
               )}
               {user ? (
-                <>
-                  <InboxNotifications />
-                  <Button variant="outline" size="sm" onClick={() => void logout()}>
-                    Logout
-                  </Button>
-                </>
+                <Button variant="outline" size="sm" onClick={() => void logout()}>
+                  Logout
+                </Button>
               ) : (
                 <>
                   <Button asChild variant="ghost" size="sm" className="hidden md:inline-flex">

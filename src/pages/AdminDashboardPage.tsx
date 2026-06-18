@@ -70,6 +70,10 @@ export default function AdminDashboardPage() {
   }
 
   const metrics = useMemo(() => dashboard?.metrics || [], [dashboard]);
+  const recentJudgeProfiles = useMemo(
+    () => dashboard?.recent_judge_profiles ?? dashboard?.recent_lawyer_profiles ?? [],
+    [dashboard],
+  );
 
   if (error && !dashboard) {
     return (
@@ -93,7 +97,7 @@ export default function AdminDashboardPage() {
           <Card className="rounded-[28px] border-slate-200 bg-white shadow-xl shadow-slate-200/40">
             <CardContent className="space-y-4 p-8 text-center">
               <p className="font-display text-4xl font-bold text-slate-950">Loading admin panel</p>
-              <p className="text-base text-slate-600">Fetching account approvals, lawyer profile reviews, and FIR activity.</p>
+              <p className="text-base text-slate-600">Fetching account approvals, judge profile reviews, and FIR activity.</p>
             </CardContent>
           </Card>
         </div>
@@ -114,7 +118,7 @@ export default function AdminDashboardPage() {
                 Approve professionals, monitor filings, and keep the platform clean.
               </h1>
               <p className="max-w-3xl text-lg leading-8 text-slate-300">
-                Review police and lawyer applications with supporting profile details, watch recent FIR traffic, and keep operational access tightly controlled.
+                Review police and judge applications with supporting profile details, watch recent FIR traffic, and keep operational access tightly controlled.
               </p>
               <div className="flex flex-wrap gap-3">
                 <Button onClick={() => void loadDashboard()} className="rounded-full bg-amber-300 text-slate-950 hover:bg-amber-200">
@@ -137,7 +141,7 @@ export default function AdminDashboardPage() {
                 <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
                   <div className="flex items-center gap-3">
                     <ShieldCheck className="h-5 w-5 text-slate-700" />
-                    <span className="font-medium text-slate-950">{dashboard.recent_lawyer_profiles.length} recent lawyer profiles visible</span>
+                    <span className="font-medium text-slate-950">{recentJudgeProfiles.length} recent judge profiles visible</span>
                   </div>
                 </div>
                 <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
@@ -169,7 +173,7 @@ export default function AdminDashboardPage() {
               <div className="flex items-center justify-between gap-4">
                 <div>
                   <p className="text-xs uppercase tracking-[0.28em] text-slate-500">Approval queue</p>
-                  <h2 className="font-display text-3xl font-bold text-slate-950">Lawyer and police applications</h2>
+                  <h2 className="font-display text-3xl font-bold text-slate-950">Judge and police applications</h2>
                 </div>
                 <Badge variant="outline" className="rounded-full border-slate-300 bg-slate-50 px-4 py-1 text-[11px] uppercase tracking-[0.28em] text-slate-600">
                   Live data
@@ -221,13 +225,13 @@ export default function AdminDashboardPage() {
                         <div className="mt-4 rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm text-slate-600">
                           <div className="flex items-center gap-2 font-medium text-slate-950">
                             <BadgeCheck className="h-4 w-4 text-amber-500" />
-                            Linked lawyer profile
+                            Linked judge profile
                           </div>
                           <div className="mt-2 grid gap-2 md:grid-cols-2">
                             <p><strong>Handle:</strong> @{application.linked_profile.handle}</p>
                             <p><strong>Verification:</strong> {application.linked_profile.verification_status}</p>
                             <p><strong>Specialization:</strong> {application.linked_profile.specialization}</p>
-                            <p><strong>Bar Council ID:</strong> {application.linked_profile.bar_council_id}</p>
+                            <p><strong>Judicial Service ID:</strong> {application.linked_profile.bar_council_id}</p>
                             <p><strong>City:</strong> {application.linked_profile.city}</p>
                           </div>
                         </div>
@@ -265,10 +269,10 @@ export default function AdminDashboardPage() {
               <CardContent className="space-y-4 p-6">
                 <div className="flex items-center gap-2">
                   <Users className="h-5 w-5 text-slate-700" />
-                  <h3 className="font-display text-2xl font-bold text-slate-950">Recent lawyer profiles</h3>
+                  <h3 className="font-display text-2xl font-bold text-slate-950">Recent judge profiles</h3>
                 </div>
                 <div className="space-y-4">
-                  {dashboard.recent_lawyer_profiles.map((profile) => (
+                  {recentJudgeProfiles.map((profile) => (
                     <div key={`${profile.handle}-${profile.created_at}`} className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
                       <p className="font-medium text-slate-950">{profile.name}</p>
                       <p className="mt-1 text-sm text-slate-600">@{profile.handle} | {profile.specialization}</p>

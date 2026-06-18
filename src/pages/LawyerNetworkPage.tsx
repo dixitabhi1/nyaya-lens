@@ -12,7 +12,7 @@ import { mergeLawyerDirectoryWithCache } from "@/lib/lawyer-cache";
 import {
   fallbackLawyerDirectoryResponse,
   fallbackLawyerNetworkFeedResponse,
-} from "@/lib/nyayasetu-data";
+} from "@/lib/nyayasathi-data";
 import {
   createLawyerNetworkPost,
   getLawyerNetworkFeed,
@@ -151,7 +151,7 @@ export default function LawyerNetworkPage() {
           <Card className="rounded-[32px] border-0 bg-slate-950 text-slate-50 shadow-2xl shadow-slate-900/20">
             <CardContent className="space-y-5 p-8">
               <Badge className="w-fit rounded-full bg-amber-300 text-slate-950 hover:bg-amber-300">
-                NyayaSetu Lawyer Network
+                NyayaSathi Lawyer Network
               </Badge>
               <h1 className="font-display text-5xl font-bold tracking-tight sm:text-6xl">
                 A professional social platform for lawyers, insight, and trust.

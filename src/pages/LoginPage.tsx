@@ -44,7 +44,7 @@ export default function LoginPage() {
             <BrandMark showText={false} markClassName="h-11 w-11" imageClassName="h-5 w-5" />
             <div>
               <CardTitle className="text-2xl">Welcome back</CardTitle>
-              <CardDescription>Sign in to continue using NyayaSetu.</CardDescription>
+              <CardDescription>Sign in to continue using NyayaSathi.</CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -74,7 +74,7 @@ export default function LoginPage() {
             </Button>
           </form>
           <p className="mt-4 text-sm text-muted-foreground">
-            New to NyayaSetu?{" "}
+            New to NyayaSathi?{" "}
             <Link to="/register" className="text-primary font-medium hover:underline">
               Create an account
             </Link>

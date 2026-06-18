@@ -12,7 +12,7 @@ import {
   fallbackLawyerDirectoryResponse,
   fallbackPoliceDashboardResponse,
   quickPrompts,
-} from "@/lib/nyayasetu-data";
+} from "@/lib/nyayasathi-data";
 import {
   getLawyers,
   getPoliceDashboard,
@@ -84,12 +84,12 @@ export default function DashboardPage() {
                   <h1 className="font-display text-5xl font-bold tracking-tight text-slate-950">
                     Hello {user?.full_name?.split(" ")[0] || "there"}.
                   </h1>
-                  <p className="text-3xl text-slate-500">How can NyayaSetu help today?</p>
+                  <p className="text-3xl text-slate-500">How can NyayaSathi help today?</p>
                 </div>
                 <div className="flex items-center gap-3 rounded-[28px] border border-slate-200 bg-white px-5 py-5 shadow-sm">
                   <Search className="h-5 w-5 text-slate-400" />
                   <span className="text-base text-slate-500">
-                    Ask about FIR drafting, tenant rights, cyber fraud, legal notices, or verified lawyers.
+                    Ask about FIR drafting, tenant rights, cyber fraud, legal notices, or verified judge workflows.
                   </span>
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -116,7 +116,7 @@ export default function DashboardPage() {
                     Police review structured complaints and FIR drafts.
                   </div>
                   <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-                    Lawyers build trust through profiles and knowledge sharing.
+                    Judges work through verified profiles and role-based decision support.
                   </div>
                 </div>
               </div>
@@ -166,29 +166,29 @@ export default function DashboardPage() {
                   </div>
                 </div>
                 <div className="rounded-[24px] border border-slate-200 bg-slate-50 p-5 text-base leading-8 text-slate-700">
-                  "My landlord is refusing to return my deposit. Show me the legal position, draft a complaint, and connect me with a verified property lawyer."
+                  "My landlord is refusing to return my deposit. Show me the legal position, draft a complaint, and route it into a verified judicial review lane."
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm text-slate-600">Possible legal provisions</div>
                   <div className="rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm text-slate-600">Suggested actions</div>
                   <div className="rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm text-slate-600">Draft complaint</div>
-                  <div className="rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm text-slate-600">Recommended lawyers</div>
+                  <div className="rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm text-slate-600">Recommended judge lane</div>
                 </div>
               </CardContent>
             </Card>
 
             <Card className="rounded-[30px] border-slate-200 bg-slate-950 text-slate-50 shadow-xl shadow-slate-900/15">
               <CardContent className="space-y-5 p-6">
-                <p className="text-xs uppercase tracking-[0.28em] text-slate-400">Featured lawyers</p>
+                <p className="text-xs uppercase tracking-[0.28em] text-slate-400">Featured judges</p>
                 {lawyers.map((lawyer) => (
-                  <Link key={lawyer.handle} to={`/lawyer/${lawyer.handle}`} className="block rounded-2xl border border-white/10 bg-white/5 px-4 py-4 transition hover:bg-white/10">
+                  <Link key={lawyer.handle} to={`/judge/${lawyer.handle}`} className="block rounded-2xl border border-white/10 bg-white/5 px-4 py-4 transition hover:bg-white/10">
                     <p className="font-semibold">{lawyer.name}</p>
                     <p className="mt-1 text-sm text-slate-300">@{lawyer.handle} - {lawyer.specialization}</p>
                     <p className="mt-2 text-xs uppercase tracking-[0.22em] text-slate-400">{lawyer.city}</p>
                   </Link>
                 ))}
                 <Button asChild variant="outline" className="w-full rounded-full border-white/20 bg-white/5 text-white hover:bg-white/10">
-                  <Link to="/lawyers">Browse verified lawyers</Link>
+                  <Link to="/judges">Browse verified judges</Link>
                 </Button>
               </CardContent>
             </Card>
@@ -228,7 +228,7 @@ export default function DashboardPage() {
             <CardContent className="space-y-4 p-6">
               <p className="text-xs uppercase tracking-[0.28em] text-slate-500">Pro tip</p>
               <p className="text-2xl font-semibold text-slate-950">
-                Start with structured complaint intake, then branch into legal analysis, lawyer discovery, and police review.
+                Start with structured complaint intake, then branch into legal analysis, judge review, and police workflow.
               </p>
               <Button asChild className="w-full rounded-full bg-slate-950 text-amber-50 hover:bg-slate-900">
                 <Link to="/fir">Open complaint workflow</Link>

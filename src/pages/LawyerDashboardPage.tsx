@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { BellRing, MessageSquareText, Sparkles, Users } from "lucide-react";
+import { BellRing, Sparkles, Users } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -28,7 +28,7 @@ export default function LawyerDashboardPage() {
         if (!active) {
           return;
         }
-        setError(err?.message || "Unable to load the lawyer dashboard right now.");
+        setError(err?.message || "Unable to load the judge dashboard right now.");
       }
     }
 
@@ -44,10 +44,10 @@ export default function LawyerDashboardPage() {
         <div className="mx-auto max-w-5xl">
           <Card className="rounded-[28px] border-slate-200 bg-white shadow-xl shadow-slate-200/40">
             <CardContent className="space-y-4 p-8 text-center">
-              <p className="font-display text-4xl font-bold text-slate-950">Lawyer dashboard unavailable</p>
+              <p className="font-display text-4xl font-bold text-slate-950">Judge dashboard unavailable</p>
               <p className="text-base text-slate-600">{error}</p>
               <Button asChild className="rounded-full bg-slate-950 text-amber-50 hover:bg-slate-900">
-                <Link to="/lawyers/join">Create or link lawyer profile</Link>
+                <Link to="/judges/join">Create or link judge profile</Link>
               </Button>
             </CardContent>
           </Card>
@@ -62,8 +62,8 @@ export default function LawyerDashboardPage() {
         <div className="mx-auto max-w-5xl">
           <Card className="rounded-[28px] border-slate-200 bg-white shadow-xl shadow-slate-200/40">
             <CardContent className="space-y-4 p-8 text-center">
-              <p className="font-display text-4xl font-bold text-slate-950">Loading lawyer dashboard</p>
-              <p className="text-base text-slate-600">Fetching followers, post engagement, and conversations.</p>
+              <p className="font-display text-4xl font-bold text-slate-950">Loading judge dashboard</p>
+              <p className="text-base text-slate-600">Fetching profile signals, published insights, and court workflow metrics.</p>
             </CardContent>
           </Card>
         </div>
@@ -78,20 +78,20 @@ export default function LawyerDashboardPage() {
           <Card className="rounded-[32px] border-0 bg-slate-950 text-slate-50 shadow-2xl shadow-slate-900/20">
             <CardContent className="space-y-5 p-8">
               <Badge className="w-fit rounded-full bg-amber-300 text-slate-950 hover:bg-amber-300">
-                Lawyer control center
+                Judge control center
               </Badge>
               <h1 className="font-display text-5xl font-bold tracking-tight">
-                Build trust, watch new followers, and respond faster.
+                Review court signals, monitor profile readiness, and move faster.
               </h1>
               <p className="max-w-3xl text-lg leading-8 text-slate-300">
-                {user?.full_name || "Your"} activity now reflects live follows, post likes, and direct conversations coming from the NyayaSetu network.
+                {user?.full_name || "Your"} workspace reflects verified judge profile activity, published insights, and court-ready operational signals.
               </p>
               <div className="flex flex-wrap gap-3">
                 <Button asChild className="rounded-full bg-amber-300 text-slate-950 hover:bg-amber-200">
-                  <Link to="/messages">Open inbox</Link>
+                  <Link to="/judges">Open judge portal</Link>
                 </Button>
                 <Button asChild variant="outline" className="rounded-full border-white/20 bg-white/5 text-white hover:bg-white/10">
-                  <Link to="/lawyer-network">Open lawyer network</Link>
+                  <Link to="/judges/join">Update judge profile</Link>
                 </Button>
               </div>
             </CardContent>
@@ -104,13 +104,13 @@ export default function LawyerDashboardPage() {
                 <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
                   <div className="flex items-center gap-3">
                     <Users className="h-5 w-5 text-slate-700" />
-                    <span className="font-medium text-slate-950">{dashboard.recent_followers.length} recent followers visible now</span>
+                    <span className="font-medium text-slate-950">{dashboard.recent_followers.length} recent profile watchers visible now</span>
                   </div>
                 </div>
                 <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
                   <div className="flex items-center gap-3">
                     <BellRing className="h-5 w-5 text-slate-700" />
-                    <span className="font-medium text-slate-950">{dashboard.recent_conversations.length} active conversations in your inbox</span>
+                    <span className="font-medium text-slate-950">{dashboard.metrics.length} court workflow metrics loaded</span>
                   </div>
                 </div>
                 <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
@@ -136,12 +136,12 @@ export default function LawyerDashboardPage() {
           ))}
         </div>
 
-        <div className="grid gap-6 xl:grid-cols-[320px_minmax(0,1fr)_320px]">
+        <div className="grid gap-6 xl:grid-cols-[320px_minmax(0,1fr)]">
           <Card className="rounded-[28px] border-slate-200 bg-white shadow-lg shadow-slate-200/40">
             <CardContent className="space-y-4 p-6">
               <div className="flex items-center gap-3">
                 <Users className="h-5 w-5 text-slate-700" />
-                <h2 className="text-2xl font-semibold text-slate-950">New followers</h2>
+                <h2 className="text-2xl font-semibold text-slate-950">Profile watchers</h2>
               </div>
               <div className="space-y-3">
                 {dashboard.recent_followers.length > 0 ? dashboard.recent_followers.map((follower) => (
@@ -151,7 +151,7 @@ export default function LawyerDashboardPage() {
                   </div>
                 )) : (
                   <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm leading-7 text-slate-600">
-                    New followers will appear here as citizens, police officers, and lawyers follow your profile.
+                    Profile watcher activity will appear here when approved users save this judge profile.
                   </div>
                 )}
               </div>
@@ -177,33 +177,7 @@ export default function LawyerDashboardPage() {
                   </div>
                 )) : (
                   <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm leading-7 text-slate-600">
-                    Publish to the lawyer network to start building public reach.
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="rounded-[28px] border-slate-200 bg-white shadow-lg shadow-slate-200/40">
-            <CardContent className="space-y-4 p-6">
-              <div className="flex items-center gap-3">
-                <MessageSquareText className="h-5 w-5 text-slate-700" />
-                <h2 className="text-2xl font-semibold text-slate-950">Recent conversations</h2>
-              </div>
-              <div className="space-y-3">
-                {dashboard.recent_conversations.length > 0 ? dashboard.recent_conversations.map((conversation) => (
-                  <Link
-                    key={conversation.conversation_id}
-                    to={`/messages?conversation=${conversation.conversation_id}`}
-                    className="block rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 transition hover:border-slate-300 hover:bg-white"
-                  >
-                    <p className="font-semibold text-slate-950">{conversation.counterpart_name}</p>
-                    <p className="mt-1 text-sm text-slate-500">{conversation.counterpart_role}</p>
-                    <p className="mt-3 text-sm leading-7 text-slate-600">{conversation.preview}</p>
-                  </Link>
-                )) : (
-                  <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm leading-7 text-slate-600">
-                    Direct chats will appear here once users start messaging you from NyayaSetu.
+                    Published judge portal insights will appear here once available.
                   </div>
                 )}
               </div>

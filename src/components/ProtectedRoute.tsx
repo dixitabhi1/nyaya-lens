@@ -2,14 +2,14 @@ import { Link, Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 
-type RequiredAccess = "lawyer" | "police" | "admin";
+type RequiredAccess = "judge" | "police" | "admin";
 
 function hasRequiredAccess(requiredAccess: RequiredAccess, user: ReturnType<typeof useAuth>["user"]) {
   if (!user) {
     return false;
   }
-  if (requiredAccess === "lawyer") {
-    return Boolean(user.can_access_lawyer_dashboard);
+  if (requiredAccess === "judge") {
+    return Boolean(user.can_access_judge_dashboard || user.can_access_lawyer_dashboard);
   }
   if (requiredAccess === "police") {
     return Boolean(user.can_access_police_dashboard);
@@ -30,7 +30,7 @@ export function ProtectedRoute({
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background text-muted-foreground">
-        Loading NyayaSetu...
+        Loading NyayaSathi...
       </div>
     );
   }
@@ -58,9 +58,9 @@ export function ProtectedRoute({
             <Button asChild variant="outline">
               <Link to="/dashboard">Go to dashboard</Link>
             </Button>
-            {requiredAccess === "lawyer" ? (
+            {requiredAccess === "judge" ? (
               <Button asChild>
-                <Link to="/lawyers/join">Create lawyer profile</Link>
+                <Link to="/judges/join">Create judge profile</Link>
               </Button>
             ) : null}
           </div>

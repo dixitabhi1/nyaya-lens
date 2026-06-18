@@ -26,7 +26,7 @@ import {
   fallbackPoliceDashboardResponse,
   featureCards,
   landingMetrics,
-} from "@/lib/nyayasetu-data";
+} from "@/lib/nyayasathi-data";
 import {
   getLawyerNetworkFeed,
   getLawyers,
@@ -119,8 +119,8 @@ const Index = () => {
 
           <div className="hidden items-center gap-6 text-sm font-medium text-slate-600 lg:flex">
             <a href="#features" className="transition-colors hover:text-slate-950">Features</a>
-            <a href="#lawyers" className="transition-colors hover:text-slate-950">Find Lawyers</a>
-            <a href="#network" className="transition-colors hover:text-slate-950">Lawyer Network</a>
+            <a href="#judges" className="transition-colors hover:text-slate-950">Judge Portal</a>
+            <a href="#insights" className="transition-colors hover:text-slate-950">Judicial Insights</a>
             <a href="#police" className="transition-colors hover:text-slate-950">Police Dashboard</a>
           </div>
 
@@ -140,7 +140,7 @@ const Index = () => {
       <main>
         {usingFallback ? (
           <div className="mx-auto max-w-7xl px-4 pt-6 text-sm text-amber-700 sm:px-6 lg:px-8">
-            Some live marketplace and operations previews are temporarily unavailable. Showing bundled preview data.
+            Some live judge portal and operations previews are temporarily unavailable. Showing bundled preview data.
           </div>
         ) : null}
 
@@ -151,10 +151,10 @@ const Index = () => {
                 India's AI-powered legal infrastructure
               </Badge>
               <h1 className="max-w-4xl font-display text-5xl font-bold tracking-tight text-slate-950 sm:text-6xl lg:text-7xl">
-                NyayaSetu - AI Powered Legal Bridge for Citizens, Police and Lawyers
+                NyayaSathi - AI Powered Legal Bridge for Citizens, Police and Judges
               </h1>
               <p className="max-w-2xl text-lg leading-8 text-slate-600 sm:text-xl">
-                File complaints, analyze legal cases, connect with verified lawyers, and understand the law - all in one intelligent platform.
+                File complaints, analyze legal cases, route work through verified judge portals, and understand the law - all in one intelligent platform.
               </p>
             </div>
 
@@ -166,7 +166,7 @@ const Index = () => {
                 <Link to="/case-analysis">Analyze My Case</Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="rounded-full border-amber-300 bg-amber-50 px-7 text-slate-900 hover:bg-amber-100">
-                <Link to="/lawyers">Find a Lawyer</Link>
+                <Link to="/judges">Open Judge Portal</Link>
               </Button>
             </div>
 
@@ -199,11 +199,11 @@ const Index = () => {
                   </div>
                   <div className="rounded-[24px] border border-white/10 bg-white/5 p-4">
                     <p className="text-sm uppercase tracking-[0.24em] text-slate-400">Court columns</p>
-                    <p className="mt-2 text-lg font-semibold">Citizens, police, and lawyers connected on one operating layer</p>
+                    <p className="mt-2 text-lg font-semibold">Citizens, police, and judges connected on one operating layer</p>
                   </div>
                   <div className="rounded-[24px] border border-white/10 bg-white/5 p-4">
                     <p className="text-sm uppercase tracking-[0.24em] text-slate-400">Law books</p>
-                    <p className="mt-2 text-lg font-semibold">BNS, IPC, bare acts, judgments, and lawyer knowledge in one place</p>
+                    <p className="mt-2 text-lg font-semibold">BNS, IPC, bare acts, judgments, and judicial knowledge in one place</p>
                   </div>
                 </div>
               </CardContent>
@@ -236,7 +236,7 @@ const Index = () => {
           <div className="mb-10 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="space-y-3">
               <Badge variant="outline" className="rounded-full border-slate-300 bg-white/80 px-4 py-1 text-[11px] uppercase tracking-[0.28em] text-slate-600">
-                Explore NyayaSetu
+                Explore NyayaSathi
               </Badge>
               <h2 className="max-w-3xl font-display text-4xl font-bold tracking-tight text-slate-950 sm:text-5xl">
                 AI-assisted complaint workflows, legal intelligence, and professional access.
@@ -278,18 +278,18 @@ const Index = () => {
           </div>
         </section>
 
-        <section id="lawyers" className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-16">
+        <section id="judges" className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-16">
           <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
             <div className="space-y-6">
               <div className="space-y-3">
                 <Badge variant="outline" className="rounded-full border-slate-300 bg-white/80 px-4 py-1 text-[11px] uppercase tracking-[0.28em] text-slate-600">
-                  Find Lawyers Marketplace
+                  Judge Portal
                 </Badge>
                 <h2 className="font-display text-4xl font-bold tracking-tight text-slate-950 sm:text-5xl">
-                  Discover verified lawyers by specialization, city, experience, and trust signals.
+                  Discover verified judges by subject area, city, service record, and court lane.
                 </h2>
                 <p className="max-w-2xl text-base leading-7 text-slate-600">
-                  NyayaSetu combines legal discovery with identity, handles, and knowledge visibility so citizens can find the right counsel faster.
+                  NyayaSathi combines judicial profile discovery with identity, handles, and role-based access so court workflows can move faster.
                 </p>
               </div>
 
@@ -297,10 +297,10 @@ const Index = () => {
                 <div className="flex flex-col gap-3 lg:flex-row">
                   <div className="flex flex-1 items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-4 text-slate-500">
                     <Search className="h-5 w-5" />
-                    <span>Search by specialization, city, years of experience, or rating</span>
+                    <span>Search by subject area, city, years of service, or court lane</span>
                   </div>
                   <Button asChild className="h-auto rounded-2xl bg-slate-950 px-6 py-4 text-amber-50 hover:bg-slate-900">
-                    <Link to="/lawyers">Browse Lawyers</Link>
+                    <Link to="/judges">Browse Judges</Link>
                   </Button>
                 </div>
               </div>
@@ -336,7 +336,7 @@ const Index = () => {
                         <span className="text-slate-500">{lawyer.fee}</span>
                       </div>
                       <Button asChild className="w-full rounded-full bg-slate-950 text-amber-50 hover:bg-slate-900">
-                        <Link to={`/lawyer/${lawyer.handle}`}>Book Consultation</Link>
+                        <Link to={`/judge/${lawyer.handle}`}>View Judge Profile</Link>
                       </Button>
                     </CardContent>
                   </Card>
@@ -352,30 +352,30 @@ const Index = () => {
                       <Users className="h-5 w-5 text-amber-300" />
                     </div>
                     <div>
-                      <p className="text-sm uppercase tracking-[0.24em] text-slate-400">Lawyer identity system</p>
-                      <p className="text-2xl font-semibold">Public handles for discovery and reputation</p>
+                      <p className="text-sm uppercase tracking-[0.24em] text-slate-400">Judge identity system</p>
+                      <p className="text-2xl font-semibold">Public handles for discovery and court role clarity</p>
                     </div>
                   </div>
                   <div className="space-y-3 text-sm text-slate-300">
-                    <p>@adv_sharma</p>
-                    <p>@criminal_law_singh</p>
+                    <p>@justice_sharma</p>
+                    <p>@criminal_bench_singh</p>
                     <p>@justice_ananya</p>
                   </div>
                   <p className="text-sm leading-7 text-slate-300">
-                    Handles power search, mentions in posts, public profile URLs, and trust building across the NyayaSetu network.
+                    Handles power search, public profile URLs, and trusted role-based visibility across the NyayaSathi judge portal.
                   </p>
                 </CardContent>
               </Card>
 
               <Card className="rounded-[30px] border-amber-200 bg-gradient-to-br from-amber-100 via-white to-amber-50 shadow-xl shadow-amber-100/60">
                 <CardContent className="space-y-4 p-6">
-                  <p className="text-xs uppercase tracking-[0.28em] text-slate-500">Lawyer self registration</p>
-                  <p className="text-2xl font-semibold text-slate-950">Build your NyayaSetu profile and verification status</p>
+                  <p className="text-xs uppercase tracking-[0.28em] text-slate-500">Judge self registration</p>
+                  <p className="text-2xl font-semibold text-slate-950">Build your NyayaSathi profile and verification status</p>
                   <p className="text-sm leading-7 text-slate-600">
-                    Lawyers can submit Bar Council ID, practice details, languages, city, consultation fee, bio, and photo to create a public profile.
+                    Judges can submit judicial service ID, court details, languages, city, review lane, bio, and photo to create a verified profile.
                   </p>
                   <Button asChild className="w-full rounded-full bg-slate-950 text-amber-50 hover:bg-slate-900">
-                    <Link to="/lawyers/join">Join as Lawyer</Link>
+                    <Link to="/judges/join">Join as Judge</Link>
                   </Button>
                 </CardContent>
               </Card>
@@ -383,21 +383,21 @@ const Index = () => {
           </div>
         </section>
 
-        <section id="network" className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-16">
+        <section id="insights" className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-16">
           <div className="grid gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
             <Card className="rounded-[30px] border-slate-200 bg-white/85 shadow-xl shadow-slate-200/50">
               <CardContent className="space-y-5 p-6">
                 <Badge variant="outline" className="rounded-full border-slate-300 bg-slate-50 px-4 py-1 text-[11px] uppercase tracking-[0.28em] text-slate-600">
-                  NyayaSetu Lawyer Network
+                  NyayaSathi Judicial Insights
                 </Badge>
                 <p className="font-display text-4xl font-bold tracking-tight text-slate-950">
-                  A professional legal knowledge feed built for trust.
+                  A court-grade legal knowledge feed built for trust.
                 </p>
                 <p className="text-sm leading-7 text-slate-600">
-                  Lawyers publish insights, analyze judgments, answer citizen queries, and build reputation in a dedicated legal-tech social layer.
+                  Verified judicial profiles can publish procedural explainers, judgment notes, and court-ready operational insights.
                 </p>
                 <Button asChild variant="outline" className="w-full rounded-full border-slate-300 bg-white hover:bg-slate-100">
-                  <Link to="/lawyer-network">Open Lawyer Network</Link>
+                  <Link to="/judges">Open Judge Portal</Link>
                 </Button>
               </CardContent>
             </Card>
@@ -419,8 +419,8 @@ const Index = () => {
                     <p className="text-sm leading-7 text-slate-600">{post.excerpt}</p>
                     <div className="flex items-center justify-between text-sm text-slate-500">
                       <span>{post.stats}</span>
-                      <Link to={`/lawyer/${post.handle}`} className="font-semibold text-slate-900 hover:text-slate-700">
-                        Follow lawyer
+                      <Link to={`/judge/${post.handle}`} className="font-semibold text-slate-900 hover:text-slate-700">
+                        View judge
                       </Link>
                     </div>
                   </CardContent>
@@ -492,20 +492,20 @@ const Index = () => {
                   Making legal access faster, transparent, and intelligent using AI
                 </Badge>
                 <h2 className="font-display text-4xl font-bold tracking-tight sm:text-5xl">
-                  Build justice infrastructure that connects citizens, police, and lawyers.
+                  Build justice infrastructure that connects citizens, police, and judges.
                 </h2>
                 <p className="max-w-3xl text-base leading-8 text-slate-300">
-                  NyayaSetu brings together AI legal assistance, complaint drafting, lawyer discovery, legal networking, and police workflows in one modern legal-tech platform.
+                  NyayaSathi brings together AI legal assistance, complaint drafting, judge portals, judicial insights, and police workflows in one modern legal-tech platform.
                 </p>
               </div>
               <div className="flex flex-wrap gap-3 lg:flex-col">
                 <Button asChild size="lg" className="rounded-full bg-amber-300 px-7 text-slate-950 hover:bg-amber-200">
                   <Link to={isAuthenticated ? "/dashboard" : "/register"}>
-                    Enter NyayaSetu <ArrowRight className="h-4 w-4" />
+                    Enter NyayaSathi <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>
                 <Button asChild size="lg" variant="outline" className="rounded-full border-white/20 bg-white/5 px-7 text-white hover:bg-white/10">
-                  <Link to="/lawyers">Explore lawyers</Link>
+                  <Link to="/judges">Explore judges</Link>
                 </Button>
               </div>
             </CardContent>

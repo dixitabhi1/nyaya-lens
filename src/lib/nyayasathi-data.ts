@@ -45,14 +45,14 @@ export type LawyerFeedPost = {
 export const landingMetrics = [
   { label: "AI complaint workflows", value: "FIR + OCR + RAG" },
   { label: "For institutions", value: "Police-ready dashboard" },
-  { label: "Professional layer", value: "Verified lawyer network" },
+  { label: "Judicial layer", value: "Verified judge portal" },
 ];
 
 export const featureCards: FeatureCard[] = [
   {
     key: "complaint",
     title: "AI Complaint Assistant",
-    description: "Citizens explain an issue in plain language and NyayaSetu turns it into a structured complaint or FIR-ready narrative.",
+    description: "Citizens explain an issue in plain language and NyayaSathi turns it into a structured complaint or FIR-ready narrative.",
     bullets: ["Simple-language intake", "Structured legal fields", "Draft-ready output"],
     gradient: "from-slate-900 via-slate-800 to-slate-700",
   },
@@ -96,14 +96,14 @@ export const featureCards: FeatureCard[] = [
 export const lawyerProfiles: LawyerProfile[] = [
   {
     handle: "adv_sharma",
-    name: "Advocate Ananya Sharma",
-    barCouncilId: "D/1234/2016",
+    name: "Justice Ananya Sharma",
+    barCouncilId: "JS/1234/2016",
     experience: "8 years",
     specialization: "Criminal Law",
-    courts: "Delhi High Court, Tis Hazari Courts",
+    courts: "Delhi High Court, Criminal Motion Bench",
     city: "New Delhi",
     languages: ["English", "Hindi"],
-    fee: "INR 2,500",
+    fee: "Criminal motion board",
     rating: 4.9,
     bio: "Criminal law strategist focused on cyber fraud, bail hearings, and victim-oriented complaint workflows.",
     about: "Ananya works on complex criminal complaints, anticipatory bail strategy, and digital evidence review for citizens navigating early-stage police process.",
@@ -124,14 +124,14 @@ export const lawyerProfiles: LawyerProfile[] = [
   },
   {
     handle: "justice_rohan",
-    name: "Advocate Rohan Mehta",
-    barCouncilId: "MH/8841/2013",
+    name: "Justice Rohan Mehta",
+    barCouncilId: "JS/MH/8841",
     experience: "11 years",
     specialization: "Cyber Crime",
-    courts: "Mumbai Sessions Court, Bombay High Court",
+    courts: "Mumbai Sessions Court, Bombay High Court Cyber Bench",
     city: "Mumbai",
     languages: ["English", "Hindi", "Marathi"],
-    fee: "INR 3,000",
+    fee: "Cyber crime review lane",
     rating: 4.8,
     bio: "Cybercrime litigator helping citizens and enterprises respond to phishing, OTP fraud, and digital extortion.",
     about: "Rohan focuses on financial cybercrime, device seizure readiness, and building strong documentary trails for investigation agencies.",
@@ -152,14 +152,14 @@ export const lawyerProfiles: LawyerProfile[] = [
   },
   {
     handle: "legal_saba",
-    name: "Advocate Saba Khan",
-    barCouncilId: "UP/4472/2018",
+    name: "Justice Saba Khan",
+    barCouncilId: "JS/UP/4472",
     experience: "6 years",
     specialization: "Family & Property",
     courts: "Lucknow Bench, District Civil Courts",
     city: "Lucknow",
     languages: ["English", "Hindi", "Urdu"],
-    fee: "INR 1,800",
+    fee: "Family and property review lane",
     rating: 4.7,
     bio: "Property and family law practitioner focused on plain-language legal access for citizens.",
     about: "Saba works on tenancy disputes, domestic relief strategy, and property possession issues with a strong emphasis on documentation and citizen education.",
@@ -183,7 +183,7 @@ export const lawyerProfiles: LawyerProfile[] = [
 export const lawyerFeedPosts: LawyerFeedPost[] = [
   {
     handle: "adv_sharma",
-    author: "Advocate Ananya Sharma",
+    author: "Justice Ananya Sharma",
     category: "Judgment Insight",
     title: "How courts are reading digital evidence in early criminal proceedings",
     excerpt: "Screenshots alone rarely tell the full story. The stronger complaint bundles metadata, chronology, and source preservation right from the first filing.",
@@ -191,7 +191,7 @@ export const lawyerFeedPosts: LawyerFeedPost[] = [
   },
   {
     handle: "justice_rohan",
-    author: "Advocate Rohan Mehta",
+    author: "Justice Rohan Mehta",
     category: "Citizen Q&A",
     title: "What should a victim preserve after OTP fraud?",
     excerpt: "Start with the call log, SMS alerts, device details, complaint number, and the exact timeline of disclosure and debit events.",
@@ -199,7 +199,7 @@ export const lawyerFeedPosts: LawyerFeedPost[] = [
   },
   {
     handle: "legal_saba",
-    author: "Advocate Saba Khan",
+    author: "Justice Saba Khan",
     category: "Bare Act Thread",
     title: "Tenant deposit disputes: when should negotiation end and legal notice begin?",
     excerpt: "If the landlord is delaying beyond a documented timeline and refusing clear communication, preserve the trail and prepare a notice strategy early.",
@@ -220,7 +220,7 @@ export const citizenAssistantHighlights = [
   "Possible legal provisions",
   "Suggested actions",
   "Draft complaint",
-  "Recommended lawyers",
+  "Recommended judge lane",
 ];
 
 export const policeDashboardCards = [
@@ -258,14 +258,14 @@ export const dashboardCards = [
     href: "/case-analysis",
   },
   {
-    title: "Find Lawyers",
-    description: "Discover verified legal professionals by specialization, city, experience, and rating.",
-    href: "/lawyers",
+    title: "Judge Portal",
+    description: "Discover verified judge profiles by subject area, city, service record, and court lane.",
+    href: "/judges",
   },
   {
-    title: "NyayaSetu Lawyer Network",
-    description: "Follow lawyers, read judgment explainers, and discover trusted public handles.",
-    href: "/lawyer-network",
+    title: "Judge Dashboard",
+    description: "Access role-based judicial workspace signals, profile readiness, and published court insights.",
+    href: "/judge-dashboard",
   },
   {
     title: "Bare Acts & Judgments",
@@ -302,7 +302,7 @@ export const fallbackLawyerSummaries: LawyerSummary[] = lawyerProfiles.map((lawy
   verification_status: lawyer.verified ? "verified" : "pending",
   follower_count: 0,
   article_count: lawyer.articles.length,
-  public_url: `nyayasetu.in/lawyer/@${lawyer.handle}`,
+  public_url: `nyayasathi.in/judge/@${lawyer.handle}`,
 }));
 
 export const fallbackLawyerDirectoryResponse: LawyerDirectoryResponse = {
@@ -328,7 +328,7 @@ export const fallbackLawyerNetworkFeedResponse: LawyerNetworkFeedResponse = {
       stats: post.stats,
       liked_by: [],
       is_liked: false,
-      public_url: `nyayasetu.in/lawyer/@${post.handle}`,
+      public_url: `nyayasathi.in/judge/@${post.handle}`,
       created_at: new Date(2026, 0, 1).toISOString(),
     };
   }),
@@ -358,7 +358,7 @@ export function fallbackLawyerDetail(handle: string): LawyerDetail | undefined {
     verification_status: lawyer.verified ? "verified" : "pending",
     follower_count: 0,
     article_count: lawyer.articles.length,
-    public_url: `nyayasetu.in/lawyer/@${lawyer.handle}`,
+    public_url: `nyayasathi.in/judge/@${lawyer.handle}`,
     about: lawyer.about,
     case_experience: lawyer.caseExperience,
     reviews: lawyer.reviews.map((review) => ({

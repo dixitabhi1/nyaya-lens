@@ -1,6 +1,6 @@
-# NyayaSetu Frontend
+# NyayaSathi Frontend
 
-This repository contains the NyayaSetu frontend intended for smooth production hosting on Vercel, with the backend served separately from Hugging Face Spaces.
+This repository contains the NyayaSathi frontend intended for smooth production hosting on Vercel, with the backend served separately from Hugging Face Spaces.
 
 Recommended deployment split:
 

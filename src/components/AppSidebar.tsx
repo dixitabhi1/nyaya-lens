@@ -1,11 +1,9 @@
 import {
   LayoutDashboard,
   MessageSquare,
-  MessagesSquare,
   Search,
   Mic,
   UserRoundSearch,
-  Network,
   BookOpenText,
   ShieldCheck,
   FileWarning,
@@ -17,7 +15,6 @@ import {
 } from "lucide-react";
 import { BrandMark } from "@/components/BrandMark";
 import { NavLink } from "@/components/NavLink";
-import { useInbox } from "@/lib/inbox-context";
 import { useAuth } from "@/lib/auth-context";
 import {
   Sidebar,
@@ -37,9 +34,7 @@ const basePlatformModules = [
   { title: "File Complaint", url: "/fir", icon: FileWarning },
   { title: "Voice FIR", url: "/fir", icon: Mic },
   { title: "Case Analysis", url: "/case-analysis", icon: Search },
-  { title: "Find Lawyers", url: "/lawyers", icon: UserRoundSearch },
-  { title: "Lawyer Network", url: "/lawyer-network", icon: Network },
-  { title: "Messages", url: "/messages", icon: MessagesSquare },
+  { title: "Judge Portal", url: "/judges", icon: UserRoundSearch },
   { title: "Bare Acts", url: "/research", icon: BookOpenText },
   { title: "Legal Vault", url: "/contracts", icon: ShieldCheck },
   { title: "Track Case", url: "/strength", icon: TrendingUp },
@@ -52,18 +47,14 @@ const baseOperationsModules = [
 
 export function AppSidebar() {
   const { state } = useSidebar();
-  const { unreadCount } = useInbox();
   const { user } = useAuth();
   const collapsed = state === "collapsed";
-  const platformModules = basePlatformModules.filter((item) => {
-    if (item.url === "/messages") {
-      return Boolean(user);
-    }
-    return true;
-  });
+  const platformModules = basePlatformModules;
   const operationsModules = [
     ...baseOperationsModules,
-    ...(user?.can_access_lawyer_dashboard ? [{ title: "Lawyer Dashboard", url: "/lawyer-dashboard", icon: MessageSquare }] : []),
+    ...(user?.can_access_judge_dashboard || user?.can_access_lawyer_dashboard
+      ? [{ title: "Judge Dashboard", url: "/judge-dashboard", icon: Landmark }]
+      : []),
     ...(user?.can_access_police_dashboard ? [{ title: "Police Dashboard", url: "/police-dashboard", icon: Landmark }] : []),
     ...(user?.can_access_admin_dashboard ? [{ title: "Admin Panel", url: "/admin", icon: Shield }] : []),
   ];
@@ -99,11 +90,6 @@ export function AppSidebar() {
                       {!collapsed && (
                         <span className="flex items-center gap-2 text-sm">
                           <span>{item.title}</span>
-                          {item.url === "/messages" && unreadCount > 0 ? (
-                            <span className="rounded-full bg-rose-500 px-2 py-0.5 text-[10px] font-semibold text-white">
-                              {unreadCount > 9 ? "9+" : unreadCount}
-                            </span>
-                          ) : null}
                         </span>
                       )}
                     </NavLink>

@@ -1,6 +1,6 @@
-export const AUTH_TOKEN_KEY = "nyayasetu_auth_token";
-export const AUTH_USER_KEY = "nyayasetu_auth_user";
-export const AUTH_EXPIRED_EVENT = "nyayasetu:auth-expired";
+export const AUTH_TOKEN_KEY = "nyayasathi_auth_token";
+export const AUTH_USER_KEY = "nyayasathi_auth_user";
+export const AUTH_EXPIRED_EVENT = "nyayasathi:auth-expired";
 
 export type AuthUser = {
   id: string;
@@ -14,6 +14,7 @@ export type AuthUser = {
   city?: string | null;
   preferred_language?: string;
   approval_notes?: string | null;
+  can_access_judge_dashboard?: boolean;
   can_access_lawyer_dashboard?: boolean;
   can_access_police_dashboard?: boolean;
   can_access_admin_dashboard?: boolean;

@@ -27,8 +27,8 @@ import {
 import FIRResult from "@/components/fir/FIRResult";
 import { VoiceTranscriptionDialog } from "@/components/fir/VoiceTranscriptionDialog";
 
-const STORAGE_KEY = "nyayasetu_fir_manual_form";
-const STORAGE_TAB_KEY = "nyayasetu_fir_active_tab";
+const STORAGE_KEY = "nyayasathi_fir_manual_form";
+const STORAGE_TAB_KEY = "nyayasathi_fir_active_tab";
 type DraftRole = "citizen_application" | "police_fir" | "lawyer_analysis";
 type DraftLanguage = "en" | "hi";
 
@@ -47,7 +47,7 @@ const defaultForm = {
   evidence_information: "",
 };
 
-const draftRoleMeta: Record<DraftRole, { title: string; description: string; access: "public" | "police" | "lawyer" }> = {
+const draftRoleMeta: Record<DraftRole, { title: string; description: string; access: "public" | "police" | "judge" }> = {
   citizen_application: {
     title: "Citizen Application",
     description: "Draft a complaint application for submission to a police station or police officer.",
@@ -59,9 +59,9 @@ const draftRoleMeta: Record<DraftRole, { title: string; description: string; acc
     access: "police",
   },
   lawyer_analysis: {
-    title: "Lawyer FIR Analysis",
-    description: "Generate a lawyer-focused review note with comparative sections and review checks.",
-    access: "lawyer",
+    title: "Judge FIR Review",
+    description: "Generate a judge-focused review note with comparative sections and review checks.",
+    access: "judge",
   },
 };
 
@@ -284,7 +284,7 @@ function VoiceTab({ draftRole, language }: { draftRole: DraftRole; language: Dra
   return (
     <div className="space-y-4">
       <NoticeBanner variant="info">
-        Voice FIR works best when you record through the NyayaSetu mic popup, review the transcript, and then preview the FIR draft before submitting it.
+        Voice FIR works best when you record through the NyayaSathi mic popup, review the transcript, and then preview the FIR draft before submitting it.
       </NoticeBanner>
       <FileUpload file={file} onFile={setFile} accept="audio/*" label="Upload voice recording" />
       <div className="flex flex-wrap gap-2">
@@ -431,7 +431,7 @@ function FIREditor({ firId, onClose }: { firId: string; onClose: () => void }) {
         draft_text: draft,
         document_kind: fir?.draft_role || "citizen_application",
         language: fir?.draft_language || "en",
-        edit_summary: "Updated from NyayaSetu FIR editor",
+        edit_summary: "Updated from NyayaSathi FIR editor",
       });
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
@@ -507,16 +507,16 @@ export default function FIRPage() {
   const [language, setLanguage] = useState<DraftLanguage>("en");
 
   const canAccessPolice = Boolean(user?.can_access_police_dashboard);
-  const canAccessLawyer = Boolean(user?.can_access_lawyer_dashboard);
+  const canAccessJudge = Boolean(user?.can_access_judge_dashboard || user?.can_access_lawyer_dashboard);
 
   useEffect(() => {
     if (draftRole === "police_fir" && !canAccessPolice) {
       setDraftRole("citizen_application");
     }
-    if (draftRole === "lawyer_analysis" && !canAccessLawyer) {
+    if (draftRole === "lawyer_analysis" && !canAccessJudge) {
       setDraftRole("citizen_application");
     }
-  }, [draftRole, canAccessPolice, canAccessLawyer]);
+  }, [draftRole, canAccessPolice, canAccessJudge]);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_TAB_KEY, activeTab);
@@ -540,7 +540,7 @@ export default function FIRPage() {
             <div>
               <p className="text-sm font-semibold text-foreground">Choose document track</p>
               <p className="text-sm text-muted-foreground">
-                Citizens can draft complaint applications immediately. Police and lawyer tracks unlock after approval.
+                Citizens can draft complaint applications immediately. Police and judge tracks unlock after approval.
               </p>
             </div>
             <div className="grid gap-3 md:grid-cols-3">
@@ -548,7 +548,7 @@ export default function FIRPage() {
                 const meta = draftRoleMeta[value];
                 const locked =
                   (meta.access === "police" && !canAccessPolice) ||
-                  (meta.access === "lawyer" && !canAccessLawyer);
+                  (meta.access === "judge" && !canAccessJudge);
                 return (
                   <button
                     key={value}
@@ -592,9 +592,9 @@ export default function FIRPage() {
           </div>
         </div>
 
-        {!canAccessPolice || !canAccessLawyer ? (
+        {!canAccessPolice || !canAccessJudge ? (
           <NoticeBanner variant="info">
-            Professional FIR lanes stay locked until the requested lawyer or police role is approved. Citizen complaint drafting remains available immediately.
+            Professional FIR lanes stay locked until the requested judge or police role is approved. Citizen complaint drafting remains available immediately.
           </NoticeBanner>
         ) : null}
       </div>

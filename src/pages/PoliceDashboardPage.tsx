@@ -3,7 +3,7 @@ import { AlertTriangle, FileCheck2, MapPinned, ShieldCheck, TimerReset } from "l
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { fallbackPoliceDashboardResponse } from "@/lib/nyayasetu-data";
+import { fallbackPoliceDashboardResponse } from "@/lib/nyayasathi-data";
 import { getPoliceDashboard, type PoliceDashboardResponse } from "@/services/api";
 
 export default function PoliceDashboardPage() {
