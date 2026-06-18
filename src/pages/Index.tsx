@@ -75,21 +75,21 @@ const Index = () => {
       }
       let usedFallback = false;
 
-      if (directory.status === "fulfilled") {
+      if (directory.status === "fulfilled" && Array.isArray(directory.value.lawyers)) {
         setLawyers(directory.value.lawyers);
       } else {
         setLawyers(fallbackLawyerDirectoryResponse.lawyers);
         usedFallback = true;
       }
 
-      if (feed.status === "fulfilled") {
+      if (feed.status === "fulfilled" && Array.isArray(feed.value.posts)) {
         setPosts(feed.value.posts);
       } else {
         setPosts(fallbackLawyerNetworkFeedResponse.posts);
         usedFallback = true;
       }
 
-      if (police.status === "fulfilled" && police.value) {
+      if (police.status === "fulfilled" && police.value && Array.isArray(police.value.cards)) {
         setPoliceCards(police.value.cards);
       } else {
         setPoliceCards(fallbackPoliceDashboardResponse.cards);

@@ -231,6 +231,10 @@ export type LawyerNetworkFeedResponse = {
   posts: LawyerNetworkPost[];
 };
 
+type RawLawyerNetworkFeedResponse = {
+  posts?: LawyerNetworkPost[];
+};
+
 export type LawyerRegistrationPayload = {
   handle: string;
   name: string;
@@ -640,10 +644,23 @@ export const getLawyers = (params?: {
   const suffix = search.toString() ? `?${search.toString()}` : "";
   return get<RawLawyerDirectoryResponse>(`/judges${suffix}`).then((data) => {
     const lawyers = data.lawyers ?? data.judges ?? [];
+    const verifiedPercentage =
+      typeof data.verified_percentage === "number"
+        ? data.verified_percentage
+        : lawyers.length > 0
+          ? Math.round((lawyers.filter((lawyer) => lawyer.verified).length / lawyers.length) * 100)
+          : 0;
     return {
       ...data,
       lawyers,
       total_lawyers: data.total_lawyers ?? data.total_judges ?? lawyers.length,
+      average_rating:
+        typeof data.average_rating === "number"
+          ? data.average_rating
+          : lawyers.length > 0
+            ? lawyers.reduce((sum, lawyer) => sum + lawyer.rating, 0) / lawyers.length
+            : 0,
+      verified_percentage: verifiedPercentage,
     };
   });
 };
@@ -652,7 +669,9 @@ export const getLawyerProfile = (handle: string) =>
   get<LawyerDetail>(`/judges/${encodeURIComponent(handle.replace(/^@/, ""))}`);
 
 export const getLawyerNetworkFeed = (limit = 20) =>
-  get<LawyerNetworkFeedResponse>(`/judges/network/feed?limit=${limit}`);
+  get<RawLawyerNetworkFeedResponse>(`/judges/network/feed?limit=${limit}`).then((data) => ({
+    posts: Array.isArray(data.posts) ? data.posts : [],
+  }));
 
 export const registerLawyerProfile = (data: LawyerRegistrationPayload) =>
   post<LawyerRegistrationResponse>("/judges/register", data);
