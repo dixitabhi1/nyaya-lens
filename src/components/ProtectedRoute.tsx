@@ -1,5 +1,6 @@
 import { Link, Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/lib/auth-context";
+import { displayRole } from "@/lib/role-display";
 import { Button } from "@/components/ui/button";
 
 type RequiredAccess = "judge" | "police" | "admin";
@@ -50,8 +51,8 @@ export function ProtectedRoute({
               : `This workspace is available only to approved ${requiredAccess} accounts.`}
           </p>
           <p className="mt-2 text-sm leading-7 text-muted-foreground">
-            Current role: <strong>{user?.role || "unknown"}</strong>
-            {user?.requested_role ? `, requested role: ${user.requested_role}` : ""}
+            Current role: <strong>{displayRole(user?.role)}</strong>
+            {user?.requested_role ? `, requested role: ${displayRole(user.requested_role)}` : ""}
             {user?.approval_status ? `, status: ${user.approval_status}` : ""}
           </p>
           <div className="mt-6 flex justify-center gap-3">

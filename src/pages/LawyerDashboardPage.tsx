@@ -6,7 +6,16 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/lib/auth-context";
+import { displayRole, sanitizeRoleText } from "@/lib/role-display";
 import { getLawyerDashboard, type LawyerDashboardResponse } from "@/services/api";
+
+function judgeDashboardError(message?: string) {
+  const sanitized = sanitizeRoleText(message);
+  if (/profile linked|profile is linked|403/i.test(sanitized)) {
+    return "Judge dashboard setup is pending. Please ask an admin to verify and link the judicial profile for this account.";
+  }
+  return sanitized || "Unable to load the judge dashboard right now.";
+}
 
 export default function LawyerDashboardPage() {
   const { user } = useAuth();
@@ -28,7 +37,7 @@ export default function LawyerDashboardPage() {
         if (!active) {
           return;
         }
-        setError(err?.message || "Unable to load the judge dashboard right now.");
+        setError(judgeDashboardError(err?.message));
       }
     }
 
@@ -147,7 +156,7 @@ export default function LawyerDashboardPage() {
                 {dashboard.recent_followers.length > 0 ? dashboard.recent_followers.map((follower) => (
                   <div key={`${follower.name}-${follower.followed_at}`} className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
                     <p className="font-semibold text-slate-950">{follower.name}</p>
-                    <p className="mt-1 text-sm text-slate-500">{follower.role}</p>
+                    <p className="mt-1 text-sm text-slate-500">{displayRole(follower.role)}</p>
                   </div>
                 )) : (
                   <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm leading-7 text-slate-600">

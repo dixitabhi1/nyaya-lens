@@ -5,6 +5,7 @@ import { BrandMark } from "./BrandMark";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth-context";
+import { displayRole } from "@/lib/role-display";
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const { user, logout } = useAuth();
@@ -30,8 +31,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 <div className="hidden md:block text-right">
                   <p className="text-sm font-medium text-foreground">{user.full_name}</p>
                   <p className="text-xs text-muted-foreground">
-                    {user.role}
-                    {user.requested_role && user.requested_role !== user.role ? ` -> ${user.requested_role}` : ""}
+                    {displayRole(user.role)}
+                    {user.requested_role && user.requested_role !== user.role ? ` -> ${displayRole(user.requested_role)}` : ""}
                     {user.approval_status ? ` | ${user.approval_status}` : ""}
                   </p>
                 </div>
